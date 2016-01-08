@@ -26,23 +26,31 @@ CREATE TABLE Matches (
 	MatchNotes text
 );
 
--- view to calculate how many points each player scored
-CREATE OR REPLACE VIEW PlayerPoints as
-	SELECT Player.PlayerID, Matches.WinnerPoints as PointsScored, Matches.LoserID as Opponent 
+-- view to calculate how many points each player scored in their wins
+CREATE OR REPLACE VIEW PlayerWinPoints as
+	SELECT Player.PlayerID as Winner, Matches.WinnerPoints, Matches.LoserID as Opponent 
 	FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Winner
-	GROUP BY PlayerID
-	UNION
-	SELECT Player.PlayerID, Matches.LoserPoints as PointsScored, Matches.WinnerID as Opponent
+	GROUP BY Winner
+;
+
+-- view to calculate how many points each player scored in their loses
+CREATE OR REPLACE VIEW PlayerLossPoints as
+	SELECT Player.PlayerID as Loser, Matches.LoserPoints, Matches.WinnerID as Opponent
 	FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Loser
-	GROUP BY PlayerID
+	GROUP BY Loser
 ;
 
 -- view to get players paired with opponents and the opponent's total wins (no duplicates)
 CREATE OR REPLACE VIEW PlayerOpponents as
-	SELECT Player.PlayerID,
-		PlayerPoints.Opponent,
-		(SELECT count(*) FROM Matches WHERE Winner in PlayerPoints.Opponent) as OpponentWins
-	FROM Player LEFT JOIN PlayerPoints on Player.PlayerID = PlayerPoints.PlayerID
+	SELECT Players.ID,
+		PlayerWinPoints.Opponent FROM PlayerWinPoints,
+		(SELECT count(*) FROM Matches WHERE Winner in PlayerWinPoints.Loser) as OpponentWins
+		FROM PlayerWinPoints
+	UNION
+	SELECT PlayerLossPoints.Opponent as PlayerID,
+		PlayerLossPoints.Winner as Opponent FROM PlayerLossPoints,
+		(SELECT count(*) FROM Matches WHERE Winner in PlayerLossPoints.Loser) as OpponentWins
+		FROM PlayerLossPoints;
 ;
 
 -- view to calculate tournament standings
