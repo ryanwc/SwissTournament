@@ -36,10 +36,10 @@ CREATE TABLE Matches (
 -- view to calculate how many points each player scored
 CREATE OR REPLACE VIEW PlayerPoints as
 	SELECT Player.PlayerID, Matches.WinnerPoints as PointsScored, Matches.Loser as Opponent 
-	FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Winner
+	FROM Player JOIN Matches ON Player.PlayerID = Matches.Winner
 	UNION
 	SELECT Player.PlayerID, Matches.LoserPoints as PointsScored, Matches.Winner as Opponent
-	FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Loser
+	FROM Player JOIN Matches ON Player.PlayerID = Matches.Loser
 ;
 
 -- view to get players paired with opponents and the opponent's total wins (no duplicates)
@@ -53,19 +53,16 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 -- view to calculate tournament standings
 -- the player in the top row is the leader, the player in the bottom row is in last place
 -- ties in total wins are broken by strength of schedule first and total points scored second
---CREATE OR REPLACE VIEW Standings as 
---	SELECT Player.PlayerName,
---		(SELECT count(*) FROM Matches WHERE (Winner = Player.PlayerID) OR (Loser = Player.PlayerID)) as MatchesPlayed,
---		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID) as Wins,
---		(SELECT count(*) FROM Matches WHERE Loser = Player.PlayerID) as Loses,
---		PlayerOpponents.OpponentWins,
---		(SELECT sum(points) FROM
---			(SELECT PlayerWinPoints.WinnerPoints, PlayerLossPoints.LoserPoints
---				FROM 
---				WHERE (Winner = Player.PlayerID) OR (Loser = Player.PlayerID)) as TotalPoints
---	FROM Player
---		LEFT JOIN Matches on Player.PlayerID = Matches.
---		LEFT JOIN PlayerOpponentWins on Player.PlayerID = PlayerOpponents.PlayerID
---		LEFT JOIN PlayerWinPoints
---		LEFT JOIN PlayerLossPoints
---;
+CREATE OR REPLACE VIEW Standings as 
+	SELECT Player.PlayerID,
+		Player.PlayerName,
+		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed,
+		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID) as Wins,
+		(SELECT count(*) FROM Matches WHERE Loser = Player.PlayerID) as Loses,
+		PlayerOpponents.OpponentWins,
+		(SELECT sum(PointsScored) FROM PlayerPoints WHERE PlayerPoints.PlayerID = Player.PlayerID) as TotalPoints
+	FROM Player
+		LEFT JOIN PlayerOpponents on Player.PlayerID = PlayerOpponents.PlayerID
+		LEFT JOIN PlayerPoints on Player.PlayerID = PlayerPoints.PlayerID
+		ORDER BY Wins, OpponentWins, TotalPoints
+;
