@@ -1,9 +1,30 @@
--- Table definitions for the tournament project.
---
--- Put your SQL 'create table' statements in this file; also 'create view'
--- statements if you choose to use it.
---
--- You can write comments in this file by starting them with two dashes, like
--- these lines here.
+-- The database schema for a Swiss-style tournament.
 
+-- to reset the database during testing
+DROP DATABASE IF EXISTS tournament
+-- create and connect to the database using psql command line commands
+CREATE DATABASE tournament;
+\c tournament;
 
+-- create the tables necessary to support a Swiss-style tournament
+
+CREATE TABLE Player (
+	PlayerID serial PRIMARY KEY,
+	PlayerName vachar(50) NOT NULL,
+	PlayerDOB date,
+	PlayerEmail varchar(30),
+	MatchesPlayed integer,
+	Wins integer,
+	Loses integer,
+	StrengthOfSchedule integer,
+	TotalPoints integer
+);
+
+CREATE TABLE Matches (
+	MatchID serial PRIMARY KEY,
+	Winner integer NOT NULL REFERENCES Player (PlayerID),
+	WinnerPoints integer NOT NULL,
+	Loser integer NOT NULL REFERENCES Player (PlayerID),
+	LoserPoints integer NOT NULL,
+	MatchNotes text
+);
