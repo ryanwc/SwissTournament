@@ -11,20 +11,21 @@ CREATE DATABASE tournament;
 CREATE TABLE Player (
 	PlayerID serial PRIMARY KEY,
 	PlayerName vachar(50) NOT NULL,
-	PlayerDOB date,
+	PlayerDOB date NOT NULL,
 	PlayerEmail varchar(30),
-	MatchesPlayed integer,
-	Wins integer,
-	Loses integer,
-	StrengthOfSchedule integer,
-	TotalPoints integer
+	MatchesPlayed integer NOT NULL CHECK (MatchesPlayed = (Wins+Loses)),
+	Wins integer CHECK NOT NULL (Wins = (MatchesPlayed-Loses)),
+	Loses integer CHECK NOT NULL (Loses = (MatchesPlayed-Wins)),
+	StrengthOfSchedule integer NOT NULL CHECK (StrengthOfSchedule >= 0),
+	TotalPoints integer NOT NULL CHECK (TotalPoints >= 0)
 );
 
 CREATE TABLE Matches (
 	MatchID serial PRIMARY KEY,
 	Winner integer NOT NULL REFERENCES Player (PlayerID),
-	WinnerPoints integer NOT NULL,
+	WinnerPoints integer NOT NULL CHECK (WinnerPoints >= 0),
 	Loser integer NOT NULL REFERENCES Player (PlayerID),
-	LoserPoints integer NOT NULL,
+	LoserPoints integer NOT NULL CHECK (LoserPoints >= 0),
 	MatchNotes text
 );
+
