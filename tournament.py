@@ -13,6 +13,11 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM Matches;")
+    connection.commit()
+    connection.close()
 
 
 def deletePlayers():
