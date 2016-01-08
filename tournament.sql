@@ -19,7 +19,7 @@ DROP VIEW IF EXISTS PlayerStandings CASCADE;
 CREATE TABLE Player (
 	PlayerID serial PRIMARY KEY,
 	PlayerName varchar(50) NOT NULL,
-	PlayerDOB date NOT NULL,
+	PlayerDOB date,
 	PlayerEmail varchar(30)
 );
 
