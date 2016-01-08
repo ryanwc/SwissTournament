@@ -50,7 +50,7 @@ def registerPlayer(name):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Player values (%s);", (name,))
+    cursor.execute("INSERT INTO Player (PlayerName) values (%s);", (name,))
     connection.commit()
     connection.close()
 
