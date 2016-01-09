@@ -68,15 +68,30 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Standings;")
+    standings = [(int(row[0]), str(row[1]), int(row[2]), int(row[3]))
+                 for row in cursor.fetchall()]
+    connection.close()
+    return standings
 
 
-def reportMatch(winner, loser):
+def reportMatch(winner, winnerPoints, loser, loserPoints):
     """Records the outcome of a single match between two players.
 
     Args:
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO Matches "
+                   "(Winner, WinnerPoints, Loser, LoserPoints) "
+                   "values (%s,%s,%s,%s);",
+                   (winner, winnerPoints, loser, loserPoints))
+    connection.commit()
+    connection.close()
  
  
 def swissPairings():
