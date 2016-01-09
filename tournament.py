@@ -58,8 +58,8 @@ def registerPlayer(name):
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place, or a
+    player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -109,5 +109,26 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT PlayerID, PlayerName FROM Standings;")
+    orderedPlayers = [(int(row[0]), str(row[1]))
+                      for row in cursor.fetchall()]
+    connection.close()
 
+    playerPairings = []
+    i = 0
+    while i < len(orderedPlayers):
+        if i < (len(orderedPlayers)-1):
+            playerPairings.append((orderedPlayers[i][0],
+                                   orderedPlayers[i][1],
+                                   orderedPlayers[i+1][0],
+                                   orderedPlayers[i+1][1]))
+        else:
+            playerPairings.append((orderedPlayers[i][0],
+                                   orderedPlayers[i][1],
+                                   null,
+                                   null)) 
+        i+=2 
 
+    return playerPairings
