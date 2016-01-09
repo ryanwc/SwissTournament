@@ -171,7 +171,6 @@ def testTies():
     [id1, id2, id3, id4] = [row[0] for row in standings]
     reportMatch(id1, 3, id2, 2, False)
     reportMatch(id3, 4, id4, 4, True)
-
     standings = playerStandings()
     for (i, n, w, m) in standings:
         if m != 1:
@@ -180,7 +179,7 @@ def testTies():
             raise ValueError("Each match winner should have one win recorded.")
         elif i in (id2, id3, id4) and w != 0:
             raise ValueError("Players that did not win should have zero wins.")
-    print "12. After a ties, players have correct standings."
+    print "12. After a round with ties, players have correct standings."
 
 
 if __name__ == '__main__':

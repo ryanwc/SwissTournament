@@ -27,11 +27,15 @@ CREATE TABLE Player (
 CREATE TABLE Matches (
 	MatchID serial PRIMARY KEY,
 	Winner integer NOT NULL REFERENCES Player (PlayerID),
-	WinnerPoints integer NOT NULL CHECK (WinnerPoints >= 0),
+	WinnerPoints integer NOT NULL,
 	Loser integer REFERENCES Player (PlayerID),
-	LoserPoints integer NOT NULL CHECK (LoserPoints >= 0),
+	LoserPoints integer NOT NULL,
 	IsATie boolean NOT NULL,
-	MatchNotes text
+	MatchNotes text,
+	CHECK ((Loser = NULL AND LoserPoints = 0 AND WinnerPoints = 0) OR 
+		   (Loser != NULL AND LoserPoints >= 0)),
+	CHECK ((IsATie = TRUE AND WinnerPoints = LoserPoints) OR 
+		   (WinnerPoints > LoserPoints AND IsATie = FALSE))
 );
 
 CREATE UNIQUE INDEX no_rematches ON Matches
@@ -66,7 +70,8 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 
 -- view to calculate tournament standings
 -- the player in the top row is the leader, the player in the bottom row is in last place
--- ties in total wins are broken by strength of schedule first and total points scored second
+-- ties in total wins are broken by strength of schedule first, total points scored second,
+-- then arbitrarily broken by order of registration (earlier registration wins)
 CREATE OR REPLACE VIEW Standings as 
 	SELECT Player.PlayerID,
 		Player.PlayerName,
