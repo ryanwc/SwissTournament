@@ -109,17 +109,38 @@ def testBye(winner):
     connection.close()
     return alreadyHadBye
 
+
+def testIfPlayed(playerOne, playerTwo):
+    """Tests if two players have already played a match
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Matches "
+                   "WHERE Winner = %s AND Loser = %s;", 
+                   (playerOne,playerTwo))
+    alreadyPlayed = cursor.fetchone()[0]==1
+    if not alreadyPlayed:
+        cursor = connection.cursor()
+        cursor.execute("SELECT count(*) FROM Matches "
+                       "WHERE Winner = %s AND Loser = %s;", 
+                       (playerTwo,playerOne))
+        alreadyPlayed = cursor.fetchone()[0]==1
+    connection.close()
+    return alreadyPlayed
+
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
   
     Each player appears exactly once in the pairings.
-    Each player is paired with another player with an equal or nearly-equal
-    win record, that is, a player adjacent to him or her in the standings.
-    If there are an odd number of players, assign a bye to the first player
-    that has not yet had a bye, starting at the top of the rankings.
-    Only one bye is allowed per player per tournament.
-  
+    Players are paired as follows:
+    1) If odd number of players, assign the bye to the highest ranked player
+    that has not had a bye (only one bye per player per tournament).
+    2) Search for pairs who are as closely ranked as possible subject to:
+        A) one of the players is the highest ranked un-paired player;
+        B) neither player is already paired for this round; and 
+        C) the players have not yet played in this tournament.
+
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
@@ -130,45 +151,37 @@ def swissPairings():
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT PlayerID, PlayerName FROM Standings;")
-    orderedPlayers = [(int(row[0]), str(row[1]))
+    orderedPlayers = [[int(row[0]), str(row[1]), False]
                       for row in cursor.fetchall()]
     connection.close()
 
     playerPairings = []
-    i = 0
-
+    # assign the bye, if needed, to highest ranked player
     if len(orderedPlayers) % 2 == 1:
-
-        byeReceiver = 0
         for j in range(0, len(orderedPlayers)):
             if not testBye(orderedPlayers[j][0]):
                 playerPairings.append((orderedPlayers[j][0],
                                        orderedPlayers[j][1],
                                        None,
                                        None))
-                byeReceiver = j
+                orderedPlayers[j][2] = True
                 break
-        while i < len(orderedPlayers):
-            if i == j-1:
-                playerPairings.append((orderedPlayers[i][0],
-                                       orderedPlayers[i][1],
-                                       orderedPlayers[i+2][0],
-                                       orderedPlayers[i+2][1]))
-                i+=3
-            elif i != j:
-                playerPairings.append((orderedPlayers[i][0],
-                                       orderedPlayers[i][1],
-                                       orderedPlayers[i+1][0],
-                                       orderedPlayers[i+1][1]))
-                i+=2
-            else:
-                i+=1
-    else:
-        while i < len(orderedPlayers):
+    # pair the highest ranked player who has not yet been paired
+    # with the next highest ranked player who has also not yet been paired
+    # and which creates a pair that has not yet played.
+    i = 0
+    while i < len(orderedPlayers):
+        if not orderedPlayers[i][2]:
+            k = i+1
+            while orderedPlayers[k][2]:
+                k+=1
+            while testIfPlayed(orderedPlayers[i][0], orderedPlayers[k][0]):
+                k+=1
             playerPairings.append((orderedPlayers[i][0],
                                    orderedPlayers[i][1],
-                                   orderedPlayers[i+1][0],
-                                   orderedPlayers[i+1][1]))
-            i+=2 
-
+                                   orderedPlayers[k][0],
+                                   orderedPlayers[k][1]))
+            orderedPlayers[i][2] = True
+            orderedPlayers[k][2] = True
+        i+=1
     return playerPairings
