@@ -32,10 +32,11 @@ CREATE TABLE Matches (
 	LoserPoints integer NOT NULL,
 	IsATie boolean NOT NULL,
 	MatchNotes text,
-	CHECK ((Loser = NULL AND LoserPoints = 0 AND WinnerPoints = 0) OR 
-		   (Loser != NULL AND LoserPoints >= 0)),
-	CHECK ((IsATie = TRUE AND WinnerPoints = LoserPoints) OR 
-		   (WinnerPoints > LoserPoints AND IsATie = FALSE))
+	CHECK (WinnerPoints >= 0 AND LoserPoints >=0),
+	CHECK (NOT(Loser = NULL AND LoserPoints > 0)),
+	CHECK (NOT(Loser = NULL AND WinnerPoints > 0)),
+	CHECK (NOT(IsATie = true AND WinnerPoints != LoserPoints)),
+	CHECK (NOT(IsATie = false AND Loser != NULL AND WinnerPoints <= LoserPoints))
 );
 
 CREATE UNIQUE INDEX no_rematches ON Matches
@@ -51,13 +52,20 @@ CREATE OR REPLACE VIEW PlayerPoints as
 ;
 
 CREATE OR REPLACE VIEW PlayerOpponents as
-	SELECT Player.PlayerID, Matches.Loser as Opponent 
+	SELECT Player.PlayerID, Matches.Loser as Opponent
 	FROM Player
 	JOIN Matches ON Player.PlayerID = Matches.Winner
 	UNION
 	SELECT Player.PlayerID, Matches.Winner as Opponent
 	FROM Player
 	JOIN Matches ON Player.PlayerID = Matches.Loser
+;
+
+CREATE OR REPLACE VIEW PlayerOpponentWins as
+	SELECT PlayerID,
+		sum((SELECT count(*) FROM Matches WHERE Winner = PlayerOpponents.Opponent AND IsATie = false))
+	FROM PlayerOpponents
+	GROUP BY PlayerID
 ;
 
 -- view to get players paired with opponents and the opponent's total wins (no duplicates)
