@@ -33,6 +33,9 @@ CREATE TABLE Matches (
 	MatchNotes text
 );
 
+CREATE UNIQUE INDEX no_rematches ON Matches
+	(greatest(Winner, Loser), least(Winner, Loser));
+
 -- view to calculate how many points each player scored
 CREATE OR REPLACE VIEW PlayerPoints as
 	SELECT Player.PlayerID, Matches.WinnerPoints as PointsScored 
