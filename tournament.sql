@@ -66,9 +66,8 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 CREATE OR REPLACE VIEW Standings as 
 	SELECT Player.PlayerID,
 		Player.PlayerName,
-		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed,
 		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID) as Wins,
-		(SELECT count(*) FROM Matches WHERE Loser = Player.PlayerID) as Loses
+		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed
 	FROM Player
 	JOIN (SELECT PlayerID, sum(PointsScored) FROM PlayerPoints GROUP BY PlayerId) as foo ON Player.PlayerID = foo.PlayerID
 	ORDER BY Wins DESC
