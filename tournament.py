@@ -92,7 +92,23 @@ def reportMatch(winner, winnerPoints, loser, loserPoints):
                    (winner, winnerPoints, loser, loserPoints))
     connection.commit()
     connection.close()
- 
+
+
+def testBye(winner):
+    """ Tests if a player has already had a bye in this tournament.
+
+    Args:
+        winner: the id nuber of the player to test
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Matches "
+                   "WHERE Winner = %s AND Loser is null;", 
+                   (winner,))
+    alreadyHadBye = cursor.fetchone()[0]==1
+    connection.close()
+    return alreadyHadBye
+
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -100,13 +116,16 @@ def swissPairings():
     Each player appears exactly once in the pairings.
     Each player is paired with another player with an equal or nearly-equal
     win record, that is, a player adjacent to him or her in the standings.
+    If there are an odd number of players, assign a bye to the first player
+    that has not yet had a bye, starting at the top of the rankings.
+    Only one bye is allowed per player per tournament.
   
     Returns:
       A list of tuples, each of which contains (id1, name1, id2, name2)
         id1: the first player's unique id
         name1: the first player's name
-        id2: the second player's unique id
-        name2: the second player's name
+        id2: the second player's unique id (null if name1 has a bye)
+        name2: the second player's name (null if name1 has a bye)
     """
     connection = connect()
     cursor = connection.cursor()
@@ -117,17 +136,39 @@ def swissPairings():
 
     playerPairings = []
     i = 0
-    while i < len(orderedPlayers):
-        if i < (len(orderedPlayers)-1):
+
+    if len(orderedPlayers) % 2 == 1:
+
+        byeReceiver = 0
+        for j in range(0, len(orderedPlayers)):
+            if not testBye(orderedPlayers[j][0]):
+                playerPairings.append((orderedPlayers[j][0],
+                                       orderedPlayers[j][1],
+                                       None,
+                                       None))
+                byeReceiver = j
+                break
+        while i < len(orderedPlayers):
+            if i == j-1:
+                playerPairings.append((orderedPlayers[i][0],
+                                       orderedPlayers[i][1],
+                                       orderedPlayers[i+2][0],
+                                       orderedPlayers[i+2][1]))
+                i+=3
+            elif i != j:
+                playerPairings.append((orderedPlayers[i][0],
+                                       orderedPlayers[i][1],
+                                       orderedPlayers[i+1][0],
+                                       orderedPlayers[i+1][1]))
+                i+=2
+            else:
+                i+=1
+    else:
+        while i < len(orderedPlayers):
             playerPairings.append((orderedPlayers[i][0],
                                    orderedPlayers[i][1],
                                    orderedPlayers[i+1][0],
                                    orderedPlayers[i+1][1]))
-        else:
-            playerPairings.append((orderedPlayers[i][0],
-                                   orderedPlayers[i][1],
-                                   null,
-                                   null)) 
-        i+=2 
+            i+=2 
 
     return playerPairings

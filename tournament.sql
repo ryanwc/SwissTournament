@@ -28,7 +28,7 @@ CREATE TABLE Matches (
 	MatchID serial PRIMARY KEY,
 	Winner integer NOT NULL REFERENCES Player (PlayerID),
 	WinnerPoints integer NOT NULL CHECK (WinnerPoints >= 0),
-	Loser integer NOT NULL REFERENCES Player (PlayerID),
+	Loser integer REFERENCES Player (PlayerID),
 	LoserPoints integer NOT NULL CHECK (LoserPoints >= 0),
 	MatchNotes text
 );
@@ -73,5 +73,5 @@ CREATE OR REPLACE VIEW Standings as
 		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed
 	FROM Player
 	LEFT JOIN (SELECT PlayerID, sum(PointsScored) FROM PlayerPoints GROUP BY PlayerId) as foo ON Player.PlayerID = foo.PlayerID
-	ORDER BY Wins DESC
+	ORDER BY Wins DESC, PlayerID
 ;

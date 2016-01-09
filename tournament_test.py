@@ -124,6 +124,40 @@ def testPairings():
             "After one match, players with one win should be paired.")
     print "8. After one match, players with one win are paired."
 
+def testOddNumberPlayers():
+    """Test if the pairing algorithm correctly handles odd number of players
+    """
+    deleteMatches()
+    deletePlayers()
+    registerPlayer("Twilight Sparkle")
+    registerPlayer("Fluttershy")
+    registerPlayer("Applejack")
+    standings = playerStandings()
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    if pairings[0][2] != None or pairings[0][1] != 'Twilight Sparkle':
+        raise ValueError(
+            "The first registered player should get a bye in the first round "
+            "if there is an odd number of players")
+    print "9. With an odd number of players, the first registered player gets " \
+          "a bye in the first round"
+    reportMatch(id1, 0, id2, 0)
+    reportMatch(id3, 1, id4, 0)
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    if pairings[0][2] != None or pairings[0][1] != 'Fluttershy':
+        raise ValueError(
+            "An incorrect player got a bye in the second round")
+    print "10. The correct player got a bye in the second round"
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    reportMatch(id1, 0, id2, 0)
+    reportMatch(id3, 3, id4, 0)
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    if pairings[0][2] != None or pairings[0][1] != 'Applejack':
+        raise ValueError(
+            "A player got more than one bye")
+    print "11. No players got more than one bye"
 
 if __name__ == '__main__':
     testDeleteMatches()
@@ -134,6 +168,7 @@ if __name__ == '__main__':
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
+    testOddNumberPlayers()
     print "Success!  All tests pass!"
 
 
