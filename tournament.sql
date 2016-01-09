@@ -30,6 +30,7 @@ CREATE TABLE Matches (
 	WinnerPoints integer NOT NULL CHECK (WinnerPoints >= 0),
 	Loser integer REFERENCES Player (PlayerID),
 	LoserPoints integer NOT NULL CHECK (LoserPoints >= 0),
+	IsATie boolean NOT NULL,
 	MatchNotes text
 );
 
@@ -69,7 +70,7 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 CREATE OR REPLACE VIEW Standings as 
 	SELECT Player.PlayerID,
 		Player.PlayerName,
-		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID) as Wins,
+		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID AND IsATie = FALSE) as Wins,
 		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed
 	FROM Player
 	LEFT JOIN (SELECT PlayerID, sum(PointsScored) FROM PlayerPoints GROUP BY PlayerId) as foo ON Player.PlayerID = foo.PlayerID

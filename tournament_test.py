@@ -88,8 +88,8 @@ def testReportMatches():
     registerPlayer("Diane Grant")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
-    reportMatch(id1, 3, id2, 2)
-    reportMatch(id3, 5, id4, 1)
+    reportMatch(id1, 3, id2, 2, False)
+    reportMatch(id3, 5, id4, 1, False)
     standings = playerStandings()
     for (i, n, w, m) in standings:
         if m != 1:
@@ -110,8 +110,8 @@ def testPairings():
     registerPlayer("Pinkie Pie")
     standings = playerStandings()
     [id1, id2, id3, id4] = [row[0] for row in standings]
-    reportMatch(id1, 2, id2, 0)
-    reportMatch(id3, 3, id4, 2)
+    reportMatch(id1, 2, id2, 0, False)
+    reportMatch(id3, 3, id4, 2, False)
     pairings = swissPairings()
     if len(pairings) != 2:
         raise ValueError(
@@ -141,8 +141,8 @@ def testOddNumberPlayers():
             "if there is an odd number of players")
     print "9. With an odd number of players, the first registered player gets " \
           "a bye in the first round"
-    reportMatch(id1, 0, id2, 0)
-    reportMatch(id3, 1, id4, 0)
+    reportMatch(id1, 0, id2, 0, False)
+    reportMatch(id3, 1, id4, 0, False)
     pairings = swissPairings()
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
     if pairings[0][2] != None or pairings[0][1] != 'Fluttershy':
@@ -150,14 +150,38 @@ def testOddNumberPlayers():
             "An incorrect player got a bye in the second round")
     print "10. The correct player got a bye in the second round"
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
-    reportMatch(id1, 0, id2, 0)
-    reportMatch(id3, 3, id4, 0)
+    reportMatch(id1, 0, id2, 0, False)
+    reportMatch(id3, 3, id4, 0, False)
     pairings = swissPairings()
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
     if pairings[0][2] != None or pairings[0][1] != 'Applejack':
         raise ValueError(
             "A player got more than one bye")
     print "11. No players got more than one bye"
+
+
+def testTies():
+    deleteMatches()
+    deletePlayers()
+    registerPlayer("Bruno Walton")
+    registerPlayer("Boots O'Neal")
+    registerPlayer("Cathy Burton")
+    registerPlayer("Diane Grant")
+    standings = playerStandings()
+    [id1, id2, id3, id4] = [row[0] for row in standings]
+    reportMatch(id1, 3, id2, 2, False)
+    reportMatch(id3, 4, id4, 4, True)
+
+    standings = playerStandings()
+    for (i, n, w, m) in standings:
+        if m != 1:
+            raise ValueError("Each player should have one match recorded.")
+        if i == id1 and w != 1:
+            raise ValueError("Each match winner should have one win recorded.")
+        elif i in (id2, id3, id4) and w != 0:
+            raise ValueError("Players that did not win should have zero wins.")
+    print "12. After a ties, players have correct standings."
+
 
 if __name__ == '__main__':
     testDeleteMatches()
@@ -169,6 +193,7 @@ if __name__ == '__main__':
     testReportMatches()
     testPairings()
     testOddNumberPlayers()
+    testTies()
     print "Success!  All tests pass!"
 
 

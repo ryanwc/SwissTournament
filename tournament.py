@@ -77,7 +77,7 @@ def playerStandings():
     return standings
 
 
-def reportMatch(winner, winnerPoints, loser, loserPoints):
+def reportMatch(winner, winnerPoints, loser, loserPoints, isTie):
     """Records the outcome of a single match between two players.
 
     Args:
@@ -87,9 +87,9 @@ def reportMatch(winner, winnerPoints, loser, loserPoints):
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Matches "
-                   "(Winner, WinnerPoints, Loser, LoserPoints) "
-                   "values (%s,%s,%s,%s);",
-                   (winner, winnerPoints, loser, loserPoints))
+                   "(Winner, WinnerPoints, Loser, LoserPoints, IsATie) "
+                   "values (%s,%s,%s,%s,%s);",
+                   (winner, winnerPoints, loser, loserPoints, isTie))
     connection.commit()
     connection.close()
 
