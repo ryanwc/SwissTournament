@@ -36,7 +36,8 @@ CREATE TABLE Matches (
 	CHECK (NOT(Loser = NULL AND LoserPoints > 0)),
 	CHECK (NOT(Loser = NULL AND WinnerPoints > 0)),
 	CHECK (NOT(IsATie = true AND WinnerPoints != LoserPoints)),
-	CHECK (NOT(IsATie = false AND Loser != NULL AND WinnerPoints <= LoserPoints))
+	CHECK (NOT(IsATie = false AND Loser != NULL
+	           AND WinnerPoints <= LoserPoints))
 );
 
 CREATE UNIQUE INDEX no_rematches ON Matches
@@ -45,30 +46,34 @@ CREATE UNIQUE INDEX no_rematches ON Matches
 -- view to show how many points each player scored
 CREATE OR REPLACE VIEW PlayerPoints as
 	SELECT Player.PlayerID, Matches.WinnerPoints as PointsScored 
-	FROM Player JOIN Matches ON Player.PlayerID = Matches.Winner
+		FROM Player JOIN Matches ON Player.PlayerID = Matches.Winner
 	UNION all
 	SELECT Player.PlayerID, Matches.LoserPoints as PointsScored
-	FROM Player JOIN Matches ON Player.PlayerID = Matches.Loser
+		FROM Player JOIN Matches ON Player.PlayerID = Matches.Loser
 ;
 
 -- view to show all players paired with each of their opponents
 CREATE OR REPLACE VIEW PlayerOpponents as
 	SELECT Player.PlayerID, Matches.Loser as Opponent
-	FROM Player
-	JOIN Matches ON Player.PlayerID = Matches.Winner
+		FROM Player
+		JOIN Matches ON Player.PlayerID = Matches.Winner
 	UNION
 	SELECT Player.PlayerID, Matches.Winner as Opponent
-	FROM Player
-	JOIN Matches ON Player.PlayerID = Matches.Loser
+		FROM Player
+		JOIN Matches ON Player.PlayerID = Matches.Loser
 ;
 
 -- view to calculate each player's opponents' total wins
 -- (which will be the tiebreaker strength of schedule)
 CREATE OR REPLACE VIEW PlayerOpponentWins as
 	SELECT PlayerID,
-		sum((SELECT count(*) FROM Matches WHERE Winner = PlayerOpponents.Opponent AND IsATie = false)) as OpponentWins
-	FROM PlayerOpponents
-	GROUP BY PlayerID
+		sum((SELECT count(*)
+			FROM Matches
+			WHERE Winner = PlayerOpponents.Opponent 
+				AND IsATie = false))
+			as OpponentWins
+		FROM PlayerOpponents
+		GROUP BY PlayerID
 ;
 
 -- view to calculate tournament standings
@@ -78,11 +83,21 @@ CREATE OR REPLACE VIEW PlayerOpponentWins as
 CREATE OR REPLACE VIEW Standings as 
 	SELECT Player.PlayerID,
 		Player.PlayerName,
-		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID AND IsATie = FALSE) as Wins,
-		(SELECT count(*) FROM Matches WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID) as MatchesPlayed,
+		(SELECT count(*)
+			FROM Matches
+			WHERE Winner = Player.PlayerID AND IsATie = FALSE)
+			as Wins,
+		(SELECT count(*)
+			FROM Matches
+			WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID)
+			as MatchesPlayed,
 		PlayerOpponentWins.OpponentWins as StrengthOfSchedule,
-		(SELECT sum(PointsScored) FROM PlayerPoints WHERE PlayerID = Player.PlayerID) as TotalPoints
-	FROM Player
-	LEFT JOIN PlayerOpponentWins ON Player.PlayerID = PlayerOpponentWins.PlayerID
-	ORDER BY Wins DESC, StrengthOfSchedule DESC, TotalPoints DESC, PlayerID
+		(SELECT sum(PointsScored)
+			FROM PlayerPoints
+			WHERE PlayerID = Player.PlayerID)
+			as TotalPoints
+		FROM Player
+		LEFT JOIN PlayerOpponentWins 
+			ON Player.PlayerID = PlayerOpponentWins.PlayerID
+		ORDER BY Wins DESC, StrengthOfSchedule DESC, TotalPoints DESC, PlayerID
 ;
