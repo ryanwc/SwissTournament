@@ -71,8 +71,8 @@ def playerStandings():
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM Standings;")
-    standings = [(int(row[0]), str(row[1]), int(row[2]), int(row[3]))
-                 for row in cursor.fetchall()]
+    standings = [(int(row[0]), str(row[1]), int(row[2]), int(row[3]),
+                 int(row[4]), int(row[5])) for row in cursor.fetchall()]
     connection.close()
     return standings
 

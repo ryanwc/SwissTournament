@@ -67,12 +67,15 @@ def testStandingsBeforeMatches():
                          "they have played any matches.")
     elif len(standings) > 2:
         raise ValueError("Only registered players should appear in standings.")
-    if len(standings[0]) != 4:
-        raise ValueError("Each playerStandings row should have four columns.")
-    [(id1, name1, wins1, matches1), (id2, name2, wins2, matches2)] = standings
-    if matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0:
+    if len(standings[0]) != 6:
+        raise ValueError("Each playerStandings row should have six columns.")
+    [(id1, name1, wins1, matches1, strength1, points1),
+     (id2, name2, wins2, matches2, strength2, points2)] = standings
+    if ( matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0 or
+         strength1 !=0 or strength2 !=0 or points1 != 0 or points2 !=0 ):
         raise ValueError(
-            "Newly registered players should have no matches or wins.")
+            "Newly registered players should have no matches, " \
+            "wins, strength of schedule, or points.")
     if set([name1, name2]) != set(["Melpomene Murray", "Randy Schwartz"]):
         raise ValueError("Registered players' names should appear in standings, "
                          "even if they have no matches played.")
@@ -91,14 +94,23 @@ def testReportMatches():
     reportMatch(id1, 3, id2, 2, False)
     reportMatch(id3, 5, id4, 1, False)
     standings = playerStandings()
-    for (i, n, w, m) in standings:
+    for (i, n, w, m, s, p) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if i in (id1, id3) and w != 1:
             raise ValueError("Each match winner should have one win recorded.")
-        elif i in (id2, id4) and w != 0:
+        if i in (id2, id4) and w != 0:
             raise ValueError("Each match loser should have zero wins recorded.")
-    print "7. After a match, players have updated standings."
+        if ( (i == id1 and p != 3) or
+             (i == id2 and p != 2) or
+             (i == id3 and p != 5) or
+             (i == id4 and p != 1) ):
+            raise ValueError("A player has the wrong number of total points.")
+        if i in (id1, id3) and s != 0:
+            raise ValueError("Winners' strength of schedule should be 0")
+        if i in (id2, id4) and s != 1:
+            raise ValueError("Losers' strength of schedule should be 1")   
+    print "7. After a match, players have correct standings."
 
 
 def testPairings():
@@ -132,7 +144,6 @@ def testOddNumberPlayers():
     registerPlayer("Twilight Sparkle")
     registerPlayer("Fluttershy")
     registerPlayer("Applejack")
-    standings = playerStandings()
     pairings = swissPairings()
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
     if pairings[0][2] != None or pairings[0][1] != 'Twilight Sparkle':
@@ -172,14 +183,54 @@ def testTies():
     reportMatch(id1, 3, id2, 2, False)
     reportMatch(id3, 4, id4, 4, True)
     standings = playerStandings()
-    for (i, n, w, m) in standings:
+    for (i, n, w, m, s, p) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
         if i == id1 and w != 1:
             raise ValueError("Each match winner should have one win recorded.")
-        elif i in (id2, id3, id4) and w != 0:
+        if i in (id2, id3, id4) and w != 0:
             raise ValueError("Players that did not win should have zero wins.")
+        if ( (i == id1 and p != 3) or
+             (i == id2 and p != 2) or
+             (i == id3 and p != 4) or
+             (i == id4 and p != 4) ):
+            raise ValueError("A player has the wrong number of total points.")
+        if i in (id1, id3, id4) and s != 0:
+            raise ValueError("Non-losers' strength of schedule should be 0")
+        if i == id2 and s != 1:
+            raise ValueError("Loser's strength of schedule should be 1")   
     print "12. After a round with ties, players have correct standings."
+
+
+def testStrengthOfSchedule():
+    """Test if players' opponents' total wins are correct
+    """
+    deleteMatches()
+    deletePlayers()
+    registerPlayer("Twilight Sparkle")
+    registerPlayer("Fluttershy")
+    registerPlayer("Applejack")
+    registerPlayer("Thor")
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    # Twilight 1 win, Fluttershy 0 wins; Appljack 1 win, Thor 0 wins
+    reportMatch(id1, 4, id2, 2, False)
+    reportMatch(id3, 5, id4, 1, False)
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    # Twilight 2 wins, Applejack 1 win; Fluttershy 0 wins, Thor 0 wins
+    reportMatch(id1, 3, id2, 2, False)
+    reportMatch(id3, 1, id4, 1, True)
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    # Thor 1 win, Twilight 2 wins; Applejack 2 wins, Fluttershy 0 wins
+    reportMatch(id2, 3, id1, 0, False)
+    reportMatch(id3, 2, id4, 1, False)
+    standings = playerStandings()
+#    if standings[0][1]
+ #       raise ValueError("Players that did not win should have zero wins.")
+  #  print "13. After three rounds including at least one tie, " \
+   #       "Strength of Schedule is correct."
 
 
 if __name__ == '__main__':
@@ -193,6 +244,7 @@ if __name__ == '__main__':
     testPairings()
     testOddNumberPlayers()
     testTies()
+ #   testStrengthOfSchedule()
     print "Success!  All tests pass!"
 
 
