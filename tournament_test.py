@@ -202,7 +202,7 @@ def testTies():
     print "12. After a round with ties, players have correct standings."
 
 
-def testStrengthOfSchedule():
+def testTieBreaks():
     """Test if players' opponents' total wins are correct
     """
     deleteMatches()
@@ -213,24 +213,55 @@ def testStrengthOfSchedule():
     registerPlayer("Thor")
     pairings = swissPairings()
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
-    # Twilight 1 win, Fluttershy 0 wins; Appljack 1 win, Thor 0 wins
     reportMatch(id1, 4, id2, 2, False)
     reportMatch(id3, 5, id4, 1, False)
-    pairings = swissPairings()
-    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
-    # Twilight 2 wins, Applejack 1 win; Fluttershy 0 wins, Thor 0 wins
-    reportMatch(id1, 3, id2, 2, False)
-    reportMatch(id3, 1, id4, 1, True)
-    pairings = swissPairings()
-    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
-    # Thor 1 win, Twilight 2 wins; Applejack 2 wins, Fluttershy 0 wins
-    reportMatch(id2, 3, id1, 0, False)
-    reportMatch(id3, 2, id4, 1, False)
+    # After one round:
+    # 1. Applejack  1 wins, 0 SOS,  5 pts, ID 3
+    # 2. Twilight   1 wins, 0 SOS,  4 pts, ID 1
+    # 3. Fluttershy 0 wins, 1 SOS,  2 pts, ID 2
+    # 4. Thor       0 wins, 1 SOS,  1 pts, ID 4
     standings = playerStandings()
-#    if standings[0][1]
- #       raise ValueError("Players that did not win should have zero wins.")
-  #  print "13. After three rounds including at least one tie, " \
-   #       "Strength of Schedule is correct."
+    position = [row[1] for row in standings]
+    if ( position[0] != 'Applejack' or
+         position[1] != 'Twilight Sparkle' or
+         position[2] != 'Fluttershy' or
+         position[3] != 'Thor' ):
+        raise ValueError("Points did not break tie correctly")
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    reportMatch(id1, 3, id2, 3, True)
+    reportMatch(id3, 2, id4, 1, False)
+    # After two rounds:
+    # 1. Twilight   1 wins,  2 SOS,  7 pts, ID 1
+    # 2. Applejack  1 wins,  1 SOS,  8 pts, ID 3
+    # 3. Fluttershy 1 wins,  1 SOS,  4 pts, ID 2
+    # 4. Thor       0 wins,  2 SOS,  2 pts, ID 4
+    standings = playerStandings()
+    position = [row[1] for row in standings]
+    if ( position[0] != 'Twilight Sparkle' or
+         position[1] != 'Applejack' or
+         position[2] != 'Fluttershy' or
+         position[3] != 'Thor' ):
+        raise ValueError("Strength of schedule did not break tie correctly")
+    pairings = swissPairings()
+    [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairings]
+    reportMatch(id2, 7, id1, 0, False)
+    reportMatch(id4, 2, id3, 1, False)
+    # After three rounds:
+    # 1. Fluttershy 2 win,  3 SOS,  6 pts, ID 2
+    # 2. Applejack  1 win,  4 SOS,  9 pts, ID 3
+    # 3. Thor       1 win,  4 SOS,  9 pts, ID 4
+    # 4. Twilight   1 win,  4 SOS,  7 pts, ID 1
+    standings = playerStandings()
+    position = [row[1] for row in standings]
+    if ( position[0] != 'Fluttershy' or
+         position[1] != 'Applejack' or
+         position[2] != 'Thor' or
+         position[3] != 'Twilight Sparkle' ):
+        raise ValueError("PlayerID did not break tie correctly")
+    print "13. After three rounds including at least one tie, and " \
+          "a three-way tie for second based on wins, "  \
+          "all tie-breakers work properly."
 
 
 if __name__ == '__main__':
@@ -244,7 +275,7 @@ if __name__ == '__main__':
     testPairings()
     testOddNumberPlayers()
     testTies()
- #   testStrengthOfSchedule()
+    testTieBreaks()
     print "Success!  All tests pass!"
 
 
