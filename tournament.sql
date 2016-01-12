@@ -7,7 +7,7 @@ CREATE DATABASE tournament;
 \c tournament;
 
 DROP TABLE IF EXISTS Player CASCADE;
-DROP TABLE IF EXISTS Matches CASCADE;
+DROP TABLE IF EXISTS Match CASCADE;
 DROP VIEW IF EXISTS PlayerPoints CASCADE;
 DROP VIEW IF EXISTS PlayerOpponents CASCADE;
 DROP VIEW IF EXISTS PlayerStandings CASCADE;
@@ -29,19 +29,18 @@ CREATE TABLE Tournament (
 );
 
 -- table holds registration info for each tournament
-CREATE TABLE Registrations (
+CREATE TABLE Registration (
 	RegistrationID serial PRIMARY KEY,
 	PlayerID NOT NULL REFERENCES Player (PlayerID),
 	TournamentID NOT NULL REFERENCES Tournament (TournamentID)
 )
 
 -- table holds match info
-CREATE TABLE Matches (
+CREATE TABLE Match (
 	MatchID serial PRIMARY KEY,
-	TournamentID NOT NULL REFERENCES Tournament (TournamentID),
-	Winner integer NOT NULL REFERENCES Player (PlayerID),
+	Winner integer NOT NULL REFERENCES Registration (RegistrationID),
 	WinnerPoints integer NOT NULL,
-	Loser integer REFERENCES Player (PlayerID),
+	Loser integer REFERENCES Registration (RegistrationID),
 	LoserPoints integer NOT NULL,
 	IsATie boolean NOT NULL,
 	MatchNotes text,
@@ -53,27 +52,27 @@ CREATE TABLE Matches (
 	           AND WinnerPoints <= LoserPoints))
 );
 
-CREATE UNIQUE INDEX no_rematches ON Matches
+CREATE UNIQUE INDEX no_rematches ON Match
 	(greatest(Winner, Loser), least(Winner, Loser));
 
 -- view to show how many points each player scored
 CREATE OR REPLACE VIEW PlayerPoints as
-	SELECT Player.PlayerID, coalesce(Matches.WinnerPoints, 0) as PointsScored 
-		FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Winner
+	SELECT Player.PlayerID, coalesce(Match.WinnerPoints, 0) as PointsScored 
+		FROM Player LEFT JOIN Match ON Player.PlayerID = Match.Winner
 	UNION all
-	SELECT Player.PlayerID, coalesce(Matches.LoserPoints, 0) as PointsScored
-		FROM Player LEFT JOIN Matches ON Player.PlayerID = Matches.Loser
+	SELECT Player.PlayerID, coalesce(Match.LoserPoints, 0) as PointsScored
+		FROM Player LEFT JOIN Match ON Player.PlayerID = Match.Loser
 ;
 
 -- view to show all players paired with each of their opponents
 CREATE OR REPLACE VIEW PlayerOpponents as
-	SELECT Player.PlayerID, Matches.Loser as Opponent
+	SELECT Player.PlayerID, Match.Loser as Opponent
 		FROM Player
-		LEFT JOIN Matches ON Player.PlayerID = Matches.Winner
+		LEFT JOIN Match ON Player.PlayerID = Match.Winner
 	UNION
-	SELECT Player.PlayerID, Matches.Winner as Opponent
+	SELECT Player.PlayerID, Match.Winner as Opponent
 		FROM Player
-		LEFT JOIN Matches ON Player.PlayerID = Matches.Loser
+		LEFT JOIN Match ON Player.PlayerID = Match.Loser
 ;
 
 -- view to calculate each player's opponents' total wins
@@ -81,7 +80,7 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 CREATE OR REPLACE VIEW PlayerOpponentWins as
 	SELECT PlayerID,
 		sum((SELECT count(*)
-			FROM Matches
+			FROM Match
 			WHERE Winner = PlayerOpponents.Opponent 
 				AND IsATie = false))
 			as OpponentWins
@@ -97,13 +96,13 @@ CREATE OR REPLACE VIEW Standings as
 	SELECT Player.PlayerID,
 		Player.PlayerName,
 		(SELECT count(*)
-			FROM Matches
+			FROM Match
 			WHERE Winner = Player.PlayerID AND IsATie = FALSE)
 			as Wins,
 		(SELECT count(*)
-			FROM Matches
+			FROM Match
 			WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID)
-			as MatchesPlayed,
+			as MatchPlayed,
 		PlayerOpponentWins.OpponentWins as StrengthOfSchedule,
 		(SELECT sum(PointsScored)
 			FROM PlayerPoints
