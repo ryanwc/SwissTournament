@@ -1,11 +1,10 @@
--- The database schema for a Swiss-style tournament.
+-- The database schema for multiple Swiss-style tournament.
 
 -- to reset the database during testing
 DROP DATABASE IF EXISTS tournament;
--- create and connect to the database using psql command line commands
+-- create and connect to the database using psql commands
 CREATE DATABASE tournament;
 \c tournament;
-
 
 DROP TABLE IF EXISTS Player CASCADE;
 DROP TABLE IF EXISTS Matches CASCADE;
@@ -13,7 +12,7 @@ DROP VIEW IF EXISTS PlayerPoints CASCADE;
 DROP VIEW IF EXISTS PlayerOpponents CASCADE;
 DROP VIEW IF EXISTS PlayerStandings CASCADE;
 
--- create the tables necessary to support a Swiss-style tournament
+-- create the tables necessary to support multiple Swiss-style tournaments
 
 -- table holds player info
 CREATE TABLE Player (
@@ -23,9 +22,23 @@ CREATE TABLE Player (
 	PlayerEmail varchar(30)
 );
 
+-- table holds tournament info
+CREATE TABLE Tournament (
+	TournamentID serial PRIMARY KEY,
+	GameType varchar(30) NOT NULL
+);
+
+-- table holds registration info for each tournament
+CREATE TABLE Registrations (
+	RegistrationID serial PRIMARY KEY,
+	PlayerID NOT NULL REFERENCES Player (PlayerID),
+	TournamentID NOT NULL REFERENCES Tournament (TournamentID)
+)
+
 -- table holds match info
 CREATE TABLE Matches (
 	MatchID serial PRIMARY KEY,
+	TournamentID NOT NULL REFERENCES Tournament (TournamentID),
 	Winner integer NOT NULL REFERENCES Player (PlayerID),
 	WinnerPoints integer NOT NULL,
 	Loser integer REFERENCES Player (PlayerID),
