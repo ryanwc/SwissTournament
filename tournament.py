@@ -34,6 +34,15 @@ def deleteTournamentMatches(tournament):
     connection.close()
 
 
+def deleteTournaments():
+    """Remove all tournaments from the database."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM Tournament")
+    connection.commit()
+    connection.close()
+
+
 def deletePlayers():
     """Remove all the player records from the database."""
     connection = connect()
@@ -66,14 +75,24 @@ def deleteTournamentRegistrations(tournament):
     connection.close()
 
 
+def countPlayers():
+    """Returns the number of recorded players."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Player")
+    numPlayers = cursor.fetchone()[0]
+    connection.close()
+    return numPlayers
+
+
 def countRegisteredPlayers():
     """Returns the number of registrations for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT count(*) FROM Regsitration")
-    numPlayers = cursor.fetchone()[0]
+    numRegistrations = cursor.fetchone()[0]
     connection.close()
-    return numPlayers
+    return numRegistrations
 
 
 def countRegisteredPlayers(tournament):
@@ -86,9 +105,44 @@ def countRegisteredPlayers(tournament):
     cursor = connection.cursor()
     cursor.execute("SELECT count(*) FROM Regsitration WHERE TournamentID = %s;"
                    , (tournament))
-    numPlayers = cursor.fetchone()[0]
+    numTournamentRegistrations = cursor.fetchone()[0]
     connection.close()
-    return numPlayers
+    return numTournamentRegistrations
+
+
+def countMatches():
+    """Returns the number of matches for all tournaments."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Match")
+    numMatches = cursor.fetchone()[0]
+    connection.close()
+    return numMatches
+
+
+def countTournamentMatches(tournament):
+    """Returns the number of matches for a specific tournament.
+
+    Args:
+      tournament: the tournament id to get # of matches for
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Match")
+    numTournamentMatches = cursor.fetchone()[0]
+    connection.close()
+    return numTournamentMatches
+
+
+def countTournaments():
+    """Returns the number of tournaments."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM Tournament")
+    numTournamens = cursor.fetchone()[0]
+    connection.close()
+    return numTournaments
+
 
 def createPlayerRecord(name):
     """Creates a record of a player.
@@ -165,6 +219,8 @@ def reportMatch(winner, winnerPoints, loser, loserPoints, isTie):
 def testBye(winner):
     """ Tests if a player has already had a bye in a specific tournament.
 
+    Helper method for swissPairings(tournament).
+
     Args:
         winner: the id of the player registration to test
     """
@@ -179,6 +235,8 @@ def testBye(winner):
 
 def testIfPlayed(registrationOne, registrationTwo):
     """Tests if two players have already played a match in a tournament.
+
+    Helper method for swissPairings(tournament).
 
     Args:
         registrationOne: the id of the first registration for the test
