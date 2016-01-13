@@ -38,7 +38,7 @@ def deleteAllTournaments():
     """Remove all tournaments from the database."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("DELETE FROM Tournament")
+    cursor.execute("DELETE FROM Tournament;")
     connection.commit()
     connection.close()
 
@@ -79,7 +79,7 @@ def countAllPlayers():
     """Returns the number of recorded players."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Player")
+    cursor.execute("SELECT count(*) FROM Player;")
     numPlayers = cursor.fetchone()[0]
     connection.close()
     return numPlayers
@@ -89,7 +89,7 @@ def countAllRegistrations():
     """Returns the number of registrations for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Regsitration")
+    cursor.execute("SELECT count(*) FROM Regsitration;")
     numRegistrations = cursor.fetchone()[0]
     connection.close()
     return numRegistrations
@@ -114,7 +114,7 @@ def countAllMatches():
     """Returns the number of matches for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Match")
+    cursor.execute("SELECT count(*) FROM Match;")
     numMatches = cursor.fetchone()[0]
     connection.close()
     return numMatches
@@ -128,7 +128,7 @@ def countMatches(tournament):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Match WHERE TournamentID = %s",
+    cursor.execute("SELECT count(*) FROM Match WHERE TournamentID = %s;",
                    (tournament,))
     numTournamentMatches = cursor.fetchone()[0]
     connection.close()
@@ -139,7 +139,7 @@ def countAllTournaments():
     """Returns the number of tournaments."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Tournament")
+    cursor.execute("SELECT count(*) FROM Tournament;")
     numTournamens = cursor.fetchone()[0]
     connection.close()
     return numTournaments
@@ -254,18 +254,21 @@ def tournamentStandings(tournament):
     return standings
 
 
-def reportMatch(winner, winnerPoints, loser, loserPoints, isTie):
+def reportMatch(tournament, winner, winnerPoints, loser, loserPoints, isTie):
     """Records the outcome of a single match between two players.
 
     Args:
+      tournament: the id number of the tournament the match is played in
       winner:  the id number of winning player registration
+      winnerPoints:  the number of points the winner scored in the match
       loser:  the id number of the losing player registration
+      loserPoints:  the number of points the loser scored in the match
     """
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Match "
-                   "(Winner, WinnerPoints, Loser, LoserPoints, IsATie) "
-                   "values (%s,%s,%s,%s,%s);",
+                   "(TournamentID, Winner, WinnerPoints, Loser, "
+                   "LoserPoints, IsATie) values (%s,%s,%s,%s,%s);",
                    (winner, winnerPoints, loser, loserPoints, isTie))
     connection.commit()
     connection.close()
@@ -282,7 +285,7 @@ def testBye(winner):
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT count(*) FROM Match WHERE Winner = %s "
-                   "AND Loser is null", (winner,))
+                   "AND Loser is null;", (winner,))
     alreadyHadBye = cursor.fetchone()[0]==1
     connection.close()
     return alreadyHadBye

@@ -186,10 +186,10 @@ def testReportMatches():
     standingsTwo = tournamentStandings(2)
     [id1, id2, id3, id4] = [row[1] for row in standingsOne]
     [id5, id6, id7, id8] = [row[1] for row in standingsTwo]
-    reportMatch(id1, 3, id2, 2, False)
-    reportMatch(id3, 5, id4, 1, False)
-    reportMatch(id5, 2, id6, 1, False)
-    reportMatch(id7, 4, id8, 0, False)
+    reportMatch(1, id1, 3, id2, 2, False)
+    reportMatch(1, id3, 5, id4, 1, False)
+    reportMatch(2, id5, 2, id6, 1, False)
+    reportMatch(2, id7, 4, id8, 0, False)
     standingsOne = tournamentStandings(1)
     standingsTwo = tournamentStandings(2)
     for (t, i, n, w, m, s, p) in standingsOne:
@@ -258,10 +258,10 @@ def testPairings():
     standingsTwo = tournamentStandings(2)
     [Rid1, Rid2, Rid3, Rid4] = [row[1] for row in standingsOne]
     [Rid5, Rid6, Rid7, Rid8] = [row[1] for row in standingsTwo]
-    reportMatch(id1, 2, id2, 0, False)
-    reportMatch(id3, 3, id4, 2, False)
-    reportMatch(id6, 1, id5, 0, False)
-    reportMatch(id8, 2, id7, 1, False)
+    reportMatch(1, id1, 2, id2, 0, False)
+    reportMatch(1, id3, 3, id4, 2, False)
+    reportMatch(2, id6, 1, id5, 0, False)
+    reportMatch(2, id8, 2, id7, 1, False)
     pairingsOne = swissPairings(1)
     pairingsTwo = swissPairings(2)
     if len(pairingsOne) != 2 or len(pairingsTwo) != 2:
@@ -309,10 +309,10 @@ def testOddNumberPlayers():
             "that tournament")
     print "10. With an odd number of players, the first registered player " \
           "in a tournament gets a bye in the first round."
-    reportMatch(Pid1, 0, Pid2, 0, False)
-    reportMatch(Pid3, 1, Pid4, 0, False)
-    reportMatch(Pid5, 0, Pid6, 0, False)
-    reportMatch(Pid7, 1, Pid8, 0, False)
+    reportMatch(1, Pid1, 0, Pid2, 0, False)
+    reportMatch(1, Pid3, 1, Pid4, 0, False)
+    reportMatch(2, Pid5, 0, Pid6, 0, False)
+    reportMatch(2, Pid7, 1, Pid8, 0, False)
     pairingsOne = swissPairings(1)
     pairingsOne = swissPairings(2)
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
@@ -325,10 +325,10 @@ def testOddNumberPlayers():
             "An incorrect player got a bye in the second round")
     print "11. The correct player got a bye in the second round " \
           "of each tournament."
-    reportMatch(Pid1, 0, id2, 0, False)
-    reportMatch(Pid3, 3, id4, 0, False)
-    reportMatch(Pid5, 0, id6, 0, False)
-    reportMatch(Pid7, 3, id8, 0, False)
+    reportMatch(1, Pid1, 0, id2, 0, False)
+    reportMatch(1, Pid3, 3, id4, 0, False)
+    reportMatch(2, Pid5, 0, id6, 0, False)
+    reportMatch(2, Pid7, 3, id8, 0, False)
     pairingsOne = swissPairings(1)
     pairingsOne = swissPairings(2)
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
@@ -366,10 +366,10 @@ def testTies():
     standingsOne = tournamentStandings(2)
     [id1, id2, id3, id4] = [row[1] for row in standingsOne]
     [id5, id6, id7, id8] = [row[1] for row in standingsTwo]
-    reportMatch(id1, 3, id2, 2, False)
-    reportMatch(id3, 4, id4, 4, True)
-    reportMatch(id5, 2, id6, 1, False)
-    reportMatch(id7, 3, id8, 3, True)
+    reportMatch(1, id1, 3, id2, 2, False)
+    reportMatch(1, id3, 4, id4, 4, True)
+    reportMatch(2, id5, 2, id6, 1, False)
+    reportMatch(2, id7, 3, id8, 3, True)
     standings = allStandings()
     for (t, i, n, w, m, s, p) in standings:
         if m != 1:
@@ -418,10 +418,10 @@ def testTieBreaks():
     pairingsTwo = swissPairings(2)
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(id1, 4, id2, 2, False)
-    reportMatch(id3, 5, id4, 1, False)
-    reportMatch(id5, 5, id2, 3, False)
-    reportMatch(id7, 6, id4, 2, False)
+    reportMatch(1, id1, 4, id2, 2, False)
+    reportMatch(1, id3, 5, id4, 1, False)
+    reportMatch(2, id5, 5, id2, 3, False)
+    reportMatch(2, id7, 6, id4, 2, False)
     # After one round of tournament 1:
     # 1. Applejack  1 wins, 0 SOS,  5 pts, ID 3
     # 2. Twilight   1 wins, 0 SOS,  4 pts, ID 1
@@ -447,10 +447,10 @@ def testTieBreaks():
     pairingsTwo = swissPairings(2)
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(id1, 3, id2, 3, True)
-    reportMatch(id3, 2, id4, 1, False)
-    reportMatch(id1, 4, id2, 4, True)
-    reportMatch(id3, 3, id4, 2, False)
+    reportMatch(1, id1, 3, id2, 3, True)
+    reportMatch(1, id3, 2, id4, 1, False)
+    reportMatch(2, id1, 4, id2, 4, True)
+    reportMatch(2, id3, 3, id4, 2, False)
     # After two rounds of tournament 1:
     # 1. Twilight   1 wins,  2 SOS,  7 pts, ID 1
     # 2. Applejack  1 wins,  1 SOS,  8 pts, ID 3
@@ -476,10 +476,10 @@ def testTieBreaks():
     pairingsTwo = swissPairings(2)
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(id2, 7, id1, 0, False)
-    reportMatch(id4, 2, id3, 1, False)
-    reportMatch(id6, 8, id5, 1, False)
-    reportMatch(id8, 3, id7, 2, False)
+    reportMatch(1, id2, 7, id1, 0, False)
+    reportMatch(1, id4, 2, id3, 1, False)
+    reportMatch(2, id6, 8, id5, 1, False)
+    reportMatch(2, id8, 3, id7, 2, False)
     # After three rounds of tournament 1:
     # 1. Fluttershy 2 win,  3 SOS,  6 pts, ID 2
     # 2. Applejack  1 win,  4 SOS,  9 pts, ID 3
