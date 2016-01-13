@@ -7,10 +7,13 @@ CREATE DATABASE tournament;
 \c tournament;
 
 DROP TABLE IF EXISTS Player CASCADE;
+DROP TABLE IF EXISTS Tournament CASCADE;
+DROP TABLE IF EXISTS Registration CASCADE;
 DROP TABLE IF EXISTS Match CASCADE;
 DROP VIEW IF EXISTS PlayerPoints CASCADE;
 DROP VIEW IF EXISTS PlayerOpponents CASCADE;
-DROP VIEW IF EXISTS PlayerStandings CASCADE;
+DROP VIEW IF EXISTS PlayerOpponentWins CASCADE;
+DROP VIEW IF EXISTS Standings CASCADE;
 
 -- create the tables necessary to support multiple Swiss-style tournaments
 
@@ -31,9 +34,9 @@ CREATE TABLE Tournament (
 -- table holds registration info for each tournament
 CREATE TABLE Registration (
 	RegistrationID serial PRIMARY KEY,
-	PlayerID NOT NULL REFERENCES Player (PlayerID),
-	TournamentID NOT NULL REFERENCES Tournament (TournamentID)
-)
+	PlayerID integer NOT NULL REFERENCES Player (PlayerID),
+	TournamentID integer NOT NULL REFERENCES Tournament (TournamentID)
+);
 
 -- table holds match info
 CREATE TABLE Match (
@@ -59,19 +62,19 @@ CREATE UNIQUE INDEX no_rematches ON Match
 CREATE OR REPLACE VIEW PlayerPoints as
 	SELECT Player.PlayerID,
 		Registration.RegistrationID,
-		coalesce(Match.WinnerPoints, 0) as PointsScored 
+		(SELECT sum(Match.WinnerPoints) FROM Match WHERE Match.Winner = Registration.RegistrationID) as PointsScored 
 		FROM Player
 		JOIN Registration ON Player.PlayerID = Registration.PlayerID
 		LEFT JOIN Match ON Player.PlayerID = Match.Winner
-		GROUP BY PlayerID, RegistrationID
+		GROUP BY Player.PlayerID, Registration.RegistrationID
 	UNION all
 	SELECT Player.PlayerID,
 		Registration.RegistrationID,
-		coalesce(Match.LoserPoints, 0) as PointsScored
+		(SELECT sum(Match.LoserPoints) FROM Match WHERE Match.Loser = Registration.RegistrationID) as PointsScored 
 		FROM Player
 		JOIN Registration ON Player.PlayerID = Registration.PlayerID
 		LEFT JOIN Match ON Player.PlayerID = Match.Loser
-		GROUP BY PlayerID, RegistrationID
+		GROUP BY Player.PlayerID, Registration.RegistrationID
 ;
 
 -- view to show all players paired with each of their opponents
@@ -81,14 +84,14 @@ CREATE OR REPLACE VIEW PlayerOpponents as
 		Match.Loser as Opponent
 		FROM Player
 		JOIN Registration ON Player.PlayerID = Registration.PlayerID
-		JOIN Match ON Player.PlayerID = Match.Winner
+		JOIN Match ON Registration.RegistrationID = Match.Winner
 	UNION
 	SELECT Player.PlayerID,
 		Registration.RegistrationID,
 		Match.Winner as Opponent
 		FROM Player
 		JOIN Registration ON Player.PlayerID = Registration.PlayerID
-		JOIN Match ON Player.PlayerID = Match.Loser
+		JOIN Match ON Registration.RegistrationID = Match.Loser
 ;
 
 -- view to calculate each player's opponents' total wins
@@ -124,11 +127,12 @@ CREATE OR REPLACE VIEW Standings as
 		PlayerOpponentWins.OpponentWins as StrengthOfSchedule,
 		(SELECT sum(PointsScored)
 			FROM PlayerPoints
-			WHERE PlayerID = Player.PlayerID)
+			WHERE RegistrationID = Registration.RegistrationID)
 			as TotalPoints
 		FROM Player
-		LEFT JOIN Tournament ON Player.PlayerID = 
+		LEFT JOIN Registration ON Player.PlayerID = Registration.PlayerID
+		LEFT JOIN Tournament ON Registration.TournamentID = Tournament.TournamentID
 		LEFT JOIN PlayerOpponentWins 
-			ON Player.PlayerID = PlayerOpponentWins.PlayerID
-		ORDER BY Wins DESC, StrengthOfSchedule DESC, TotalPoints DESC, PlayerID
+			ON Registration.RegistrationID = PlayerOpponentWins.RegistrationID
+		ORDER BY TournamentID DESC, Wins DESC, StrengthOfSchedule DESC, TotalPoints DESC, PlayerID
 ;
