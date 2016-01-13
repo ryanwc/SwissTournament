@@ -113,9 +113,9 @@ CREATE OR REPLACE VIEW PlayerOpponentWins as
 -- ties in total wins are broken by strength of schedule first, total points scored second,
 -- then arbitrarily broken by order of registration (earlier registration wins)
 CREATE OR REPLACE VIEW Standings as 
-	SELECT Registration.RegistrationID,
+	SELECT Tournament.TournamentID,
+		Registration.RegistrationID,
 		Player.PlayerName,
-		Tournament.TournamentID,
 		(SELECT count(*)
 			FROM Match
 			WHERE Winner = Player.PlayerID AND IsATie = FALSE)
