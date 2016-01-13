@@ -43,7 +43,7 @@ CREATE TABLE Registration (
 -- WITH USER-DEFINED FUNCTION IN CHECK CONSTRAINT
 CREATE TABLE Match (
 	MatchID serial PRIMARY KEY,
-	Tournament NOT NULL REFERENCES Tournament (TournamentID)
+	TournamentID integer NOT NULL REFERENCES Tournament (TournamentID),
 	Winner integer NOT NULL REFERENCES Registration (RegistrationID),
 	WinnerPoints integer NOT NULL,
 	Loser integer REFERENCES Registration (RegistrationID),
@@ -128,16 +128,16 @@ CREATE OR REPLACE VIEW Standings as
 		Player.PlayerName,
 		(SELECT count(*)
 			FROM Match
-			WHERE Winner = Player.PlayerID AND IsATie = FALSE)
+			WHERE Winner = Registration.RegistrationID AND IsATie = FALSE)
 			as Wins,
 		(SELECT count(*)
 			FROM Match
-			WHERE Winner = Player.PlayerID OR Loser = Player.PlayerID)
+			WHERE Winner = Registration.RegistrationID OR Loser = Registration.RegistrationID)
 			as MatchPlayed,
-		PlayerOpponentWins.OpponentWins as StrengthOfSchedule,
-		(SELECT sum(PointsScored)
+		coalesce(PlayerOpponentWins.OpponentWins, 0) as StrengthOfSchedule,
+		coalesce((SELECT sum(PointsScored)
 			FROM PlayerPoints
-			WHERE RegistrationID = Registration.RegistrationID)
+			WHERE RegistrationID = Registration.RegistrationID),0)
 			as TotalPoints
 		FROM Player
 		LEFT JOIN Registration
