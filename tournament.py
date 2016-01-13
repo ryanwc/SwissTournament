@@ -11,16 +11,16 @@ def connect():
     return psycopg2.connect("dbname=tournament")
 
 
-def deleteMatches():
+def deleteAllMatches():
     """Remove all the match records from the database."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("DELETE FROM Matches;")
+    cursor.execute("DELETE FROM Match;")
     connection.commit()
     connection.close()
 
 
-def deleteTournamentMatches(tournament):
+def deleteMatches(tournament):
     """Remove all matches from a specific tournament from the database.
 
     Args:
@@ -28,13 +28,13 @@ def deleteTournamentMatches(tournament):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("DELETE FROM Matches WHERE TournamentID = %s;",
+    cursor.execute("DELETE FROM Match WHERE TournamentID = %s;",
                    (tournament,))
     connection.commit()
     connection.close()
 
 
-def deleteTournaments():
+def deleteAllTournaments():
     """Remove all tournaments from the database."""
     connection = connect()
     cursor = connection.cursor()
@@ -43,7 +43,7 @@ def deleteTournaments():
     connection.close()
 
 
-def deletePlayers():
+def deleteAllPlayers():
     """Remove all the player records from the database."""
     connection = connect()
     cursor = connection.cursor()
@@ -52,7 +52,7 @@ def deletePlayers():
     connection.close()
 
 
-def deleteRegistrations():
+def deleteAllRegistrations():
     """Remove all player registrations from the database."""
     connection = connect()
     cursor = connection.cursor()
@@ -61,7 +61,7 @@ def deleteRegistrations():
     connection.close()
 
 
-def deleteTournamentRegistrations(tournament):
+def deleteRegistrations(tournament):
     """Remove all registrations for a specific tournament from the database.
     
     Args:
@@ -75,7 +75,7 @@ def deleteTournamentRegistrations(tournament):
     connection.close()
 
 
-def countPlayers():
+def countAllPlayers():
     """Returns the number of recorded players."""
     connection = connect()
     cursor = connection.cursor()
@@ -85,7 +85,7 @@ def countPlayers():
     return numPlayers
 
 
-def countRegistrations():
+def countAllRegistrations():
     """Returns the number of registrations for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
@@ -110,7 +110,7 @@ def countRegistrations(tournament):
     return numTournamentRegistrations
 
 
-def countMatches():
+def countAllMatches():
     """Returns the number of matches for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
@@ -128,13 +128,14 @@ def countMatches(tournament):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Match")
+    cursor.execute("SELECT count(*) FROM Match WHERE TournamentID = %s",
+                   (tournament,))
     numTournamentMatches = cursor.fetchone()[0]
     connection.close()
     return numTournamentMatches
 
 
-def countTournaments():
+def countAllTournaments():
     """Returns the number of tournaments."""
     connection = connect()
     cursor = connection.cursor()
@@ -190,7 +191,7 @@ def registerPlayer(player, tournament):
     connection.close()
 
 
-def playerStandings():
+def allStandings():
     """Returns a list of the player rankings for ALL tournaments.
 
     Players are sorted by wins, strength of schedule, points scored,
@@ -216,14 +217,14 @@ def playerStandings():
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM Standings;")
-    standings = [(int(row[0]), (int(row[1]), str(row[2]),
-                 int(row[3]), int(row[4]),
-                 int(row[5]), int(row[6])) for row in cursor.fetchall()]
+    standings = [(int(row[0]), int(row[1]), str(row[2]),
+                  int(row[3]), int(row[4]),
+                  int(row[5]), int(row[6])) for row in cursor.fetchall()]
     connection.close()
     return standings
 
 
-def playerStandings(tournament):
+def tournamentStandings(tournament):
     """Returns a list of the players rankings for a single tournament.
 
     Players are sorted by wins, strength of schedule, points scored,
@@ -245,10 +246,10 @@ def playerStandings(tournament):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM Standings WHERE TournamentID = %s",
-                   (tournament,)
+    cursor.execute("SELECT * FROM Standings WHERE TournamentID = %s;",
+                   (tournament,))
     standings = [(int(row[1]), str(row[2]), int(row[3]), int(row[4]),
-                 int(row[5]), int(row[6])) for row in cursor.fetchall()]
+                  int(row[5]), int(row[6])) for row in cursor.fetchall()]
     connection.close()
     return standings
 
@@ -262,7 +263,7 @@ def reportMatch(winner, winnerPoints, loser, loserPoints, isTie):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Matches "
+    cursor.execute("INSERT INTO Match "
                    "(Winner, WinnerPoints, Loser, LoserPoints, IsATie) "
                    "values (%s,%s,%s,%s,%s);",
                    (winner, winnerPoints, loser, loserPoints, isTie))
@@ -280,7 +281,7 @@ def testBye(winner):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Matches WHERE Winner = %s "
+    cursor.execute("SELECT count(*) FROM Match WHERE Winner = %s "
                    "AND Loser is null", (winner,))
     alreadyHadBye = cursor.fetchone()[0]==1
     connection.close()
@@ -298,13 +299,13 @@ def testIfPlayed(registrationOne, registrationTwo):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Matches "
+    cursor.execute("SELECT count(*) FROM Match "
                    "WHERE Winner = %s AND Loser = %s;", 
-                   (registrationOne,registrationTwo)
+                   (registrationOne,registrationTwo))
     alreadyPlayed = cursor.fetchone()[0]==1
     if not alreadyPlayed:
         cursor = connection.cursor()
-        cursor.execute("SELECT count(*) FROM Matches "
+        cursor.execute("SELECT count(*) FROM Match "
                        "WHERE Winner = %s AND Loser = %s;", 
                        (registrationTwo,registrationOne))
         alreadyPlayed = cursor.fetchone()[0]==1

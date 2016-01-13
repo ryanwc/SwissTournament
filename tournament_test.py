@@ -7,24 +7,24 @@ from tournament import *
 
 def testDelete():
     """Test if deletion from tables works"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     print "1. All matches, registrations, tournaments and " \
         "players can be deleted."
 
 
 def testCount():
     """Test if count returns numeric type 0 for empty tables"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
-    cM = countMatches()
-    cR = countRegistrations()
-    cT = countTournaments()
-    cP = countPlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
+    cM = countAllMatches()
+    cR = countAllRegistrations()
+    cT = countAllTournaments()
+    cP = countAllPlayers()
     if cM == '0' or cR == '0' or cT == '0' or cP == '0':
         raise TypeError(
             "Counts should return numeric zero, not string '0'.")
@@ -35,38 +35,38 @@ def testCount():
 
 def testCreatePlayer():
     """Test if player records can be created"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Chandra Nalaar")
-    c = countPlayers()
+    c = countAllPlayers()
     if c != 1:
         raise ValueError(
-            "After creating one player record, countPlayers() should be 1.")
-    print "3. After creating one player record, countPlayers() returns 1."
+            "After creating one player record, count of players should be 1.")
+    print "3. After creating one player record, count of players returns 1."
 
 
 def testCreateTournament():
     """Test if tournaments can be created"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createTournament("Fencing")
-    c = countTournaments()
+    c = countAllTournaments()
     if c != 1:
         raise ValueError(
-            "After creating one tournament, countTournaments() should be 1.")
-    print "4. After creating one tournament, countTournaments() returns 1."
+            "After creating one tournament, count of tournaments should be 1.")
+    print "4. After creating one tournament, count of tournaments returns 1."
 
 
 def testRegister():
     """Test if player players can be registered to different tournaments"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Chandra Nalaar")
     createPlayerRecord("Ned Flanders")
     createTournament("Fencing")
@@ -74,7 +74,7 @@ def testRegister():
     registerPlayer(1, 1)
     registerPlayer(2, 1)
     registerPlayer(1, 2)
-    cTotal = countRegistrations()
+    cTotal = countAllRegistrations()
     cFence = countRegistrations(1)
     cPing = countRegistrations(2)
     if cTotal != 3 or cFence != 2 or cPing != 1:
@@ -87,10 +87,10 @@ def testRegister():
 
 def testRegisterCountDeleteCount():
     """Test table counts after registration and then deletion"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Markov Chaney")
     createPlayerRecord("Joe Malik")
     createPlayerRecord("Mao Tsu-hsi")
@@ -105,22 +105,22 @@ def testRegisterCountDeleteCount():
     registerPlayer(2, 2)
     registerPlayer(3, 2)
     registerPlayer(4, 2)
-    cPlayers = countPlayers()
-    cRegistrations = countRegistrations()
+    cPlayers = countAllPlayers()
+    cRegistrations = countAllRegistrations()
     cFencing = countRegistrstions(1)
     cPing = countRegistrations(2)
-    cTourn = countTournaments()
+    cTourn = countAllTournaments()
     if (cPlayers != 4 or cRegistrations != 8 or 
         cFencing != 4 or cPing != 4 or cTourn != 2):
         raise ValueError(
             "After registering four players for two tournaments, " \
             "counts are wrong.")
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
-    cPlayers = countPlayers()
-    cRegistrations = countRegistrations()
-    cTourn = countTournaments()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
+    cPlayers = countAllPlayers()
+    cRegistrations = countAllRegistrations()
+    cTourn = countAllTournaments()
     if cPlayers != 0 or cRegistrations != 0 or cTourn != 0:
         raise ValueError("After deleting, counts should return zero.")
     print "6. Players can be registered and deleted."
@@ -128,17 +128,17 @@ def testRegisterCountDeleteCount():
 
 def testStandingsBeforeMatches():
     """Test whether standings show players with no matches"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Melpomene Murray")
     createPlayerRecord("Randy Schwartz")
     createTournament("Fencing")
     createTournament("Ping Pong")
     registerPlayer(1, 1)
     registerPlayer(2, 1)
-    standings = playerStandings(1)
+    standings = tournamentStandings(1)
     if len(standings) < 2:
         raise ValueError("Players should appear in standings for a " \
                          "tournament even if they have not played any " \
@@ -146,7 +146,7 @@ def testStandingsBeforeMatches():
     elif len(standings) > 2:
         raise ValueError("Only registered players should appear in standings.")
     if len(standings[0]) != 6:
-        raise ValueError("Each playerStandings row should have seven columns.")
+        raise ValueError("Each standings row should have seven columns.")
     [(tournament, id1, name1, wins1, matches1, strength1, points1),
      (tournament, id2, name2, wins2, matches2, strength2, points2)] = standings
     if ( matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0 or
@@ -164,10 +164,10 @@ def testStandingsBeforeMatches():
 
 def testReportMatches():
     """Test if recording matches causes correct changes to standings"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Bruno Walton")
     createPlayerRecord("Boots O'Neal")
     createPlayerRecord("Cathy Burton")
@@ -182,16 +182,16 @@ def testReportMatches():
     registerPlayer(2, 2)
     registerPlayer(3, 2)
     registerPlayer(4, 2)
-    standingsOne = playerStandings(1)
-    standingsTwo = playerStandings(2)
+    standingsOne = tournamentStandings(1)
+    standingsTwo = tournamentStandings(2)
     [id1, id2, id3, id4] = [row[1] for row in standingsOne]
     [id5, id6, id7, id8] = [row[1] for row in standingsTwo]
     reportMatch(id1, 3, id2, 2, False)
     reportMatch(id3, 5, id4, 1, False)
     reportMatch(id5, 2, id6, 1, False)
     reportMatch(id7, 4, id8, 0, False)
-    standingsOne = playerStandings(1)
-    standingsTwo = playerStandings(2)
+    standingsOne = tournamentStandings(1)
+    standingsTwo = tournamentStandings(2)
     for (t, i, n, w, m, s, p) in standingsOne:
         if t != 1:
             raise ValueError("TournmentID is not correct in standings.")
@@ -231,15 +231,15 @@ def testReportMatches():
         if i in (id2, id4) and s != 1:
             raise ValueError("Losers' strength of schedule should be 1")   
     print "8. After a round of matches in two tournaments, " \
-          "players standings are correct."
+          "players standings are correct and count of matches is correct."
 
 
 def testPairings():
     """Test if pairing algorithm works for multiple tournaments"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Twilight Sparkle")
     createPlayerRecord("Fluttershy")
     createPlayerRecord("Applejack")
@@ -254,8 +254,8 @@ def testPairings():
     registerPlayer(2, 2)
     registerPlayer(3, 2)
     registerPlayer(4, 2)
-    standingsOne = playerStandings(1)
-    standingsTwo = playerStandings(2)
+    standingsOne = tournamentStandings(1)
+    standingsTwo = tournamentStandings(2)
     [Rid1, Rid2, Rid3, Rid4] = [row[1] for row in standingsOne]
     [Rid5, Rid6, Rid7, Rid8] = [row[1] for row in standingsTwo]
     reportMatch(id1, 2, id2, 0, False)
@@ -280,10 +280,10 @@ def testPairings():
 
 def testOddNumberPlayers():
     """Test if pairing algorithm handles multiple odd # player tournaments"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Twilight Sparkle")
     createPlayerRecord("Fluttershy")
     createPlayerRecord("Applejack")
@@ -344,10 +344,10 @@ def testOddNumberPlayers():
 
 def testTies():
     """Test if pairings and standings for multiple tournies work with ties"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Bruno Walton")
     createPlayerRecord("Boots O'Neal")
     createPlayerRecord("Cathy Burton")
@@ -362,15 +362,15 @@ def testTies():
     registerPlayer(2, 2)
     registerPlayer(3, 2)
     registerPlayer(4, 2)
-    standingsOne = playerStandings(1)
-    standingsOne = playerStandings(2)
+    standingsOne = tournamentStandings(1)
+    standingsOne = tournamentStandings(2)
     [id1, id2, id3, id4] = [row[1] for row in standingsOne]
     [id5, id6, id7, id8] = [row[1] for row in standingsTwo]
     reportMatch(id1, 3, id2, 2, False)
     reportMatch(id3, 4, id4, 4, True)
     reportMatch(id5, 2, id6, 1, False)
     reportMatch(id7, 3, id8, 3, True)
-    standings = playerStandings()
+    standings = allStandings()
     for (t, i, n, w, m, s, p) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
@@ -396,10 +396,10 @@ def testTies():
 
 def testTieBreaks():
     """Test if tie breakers work properly"""
-    deleteMatches()
-    deleteRegistrations()
-    deleteTournaments()
-    deletePlayers()
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
     createPlayerRecord("Twilight Sparkle")
     createPlayerRecord("Fluttershy")
     createPlayerRecord("Applejack")
@@ -432,7 +432,7 @@ def testTieBreaks():
     # 2. Twilight   1 wins, 0 SOS,  5 pts, ID 5
     # 3. Fluttershy 0 wins, 1 SOS,  3 pts, ID 6
     # 4. Thor       0 wins, 1 SOS,  2 pts, ID 8
-    standings = playerStandings()
+    standings = allStandings()
     position = [row[1] for row in standings]
     if ( position[0] != 'Applejack' or
          position[1] != 'Twilight Sparkle' or
@@ -461,7 +461,7 @@ def testTieBreaks():
     # 2. Applejack  1 wins,  1 SOS,  10 pts, ID 7
     # 3. Fluttershy 1 wins,  1 SOS,  6 pts,  ID 6
     # 4. Thor       0 wins,  2 SOS,  4 pts,  ID 8
-    standings = playerStandings()
+    standings = allStandings()
     position = [row[1] for row in standings]
     if ( position[0] != 'Twilight Sparkle' or
          position[1] != 'Applejack' or
@@ -490,7 +490,7 @@ def testTieBreaks():
     # 2. Applejack  1 win,  4 SOS,  12 pts, ID 7
     # 3. Thor       1 win,  4 SOS,  12 pts, ID 8
     # 4. Twilight   1 win,  4 SOS,  10 pts, ID 5
-    standings = playerStandings()
+    standings = allStandings()
     position = [row[1] for row in standings]
     if ( position[0] != 'Fluttershy' or
          position[1] != 'Applejack' or
