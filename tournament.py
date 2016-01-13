@@ -90,8 +90,20 @@ def countRegisteredPlayers(tournament):
     connection.close()
     return numPlayers
 
+def createPlayerRecord(name):
+    """Creates a record of a player.
+  
+    Args:
+      name: the player's full name (need not be unique).
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO Player (PlayerName) values (%s);", (name,))
+    connection.commit()
+    connection.close()
 
-def registerPlayer(name, tournament):
+
+def registerPlayer(player, tournament):
     """Registers a player for a specific tournament.
   
     The database assigns a unique serial id number for the registration.
@@ -99,13 +111,13 @@ def registerPlayer(name, tournament):
     more than one related registration id.
   
     Args:
-      name: the player's full name (need not be unique).
+      player: the player's id
       tournament: the id of the tournament the player will register for
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("INSERT INTO Player (PlayerName) values (%s,%s);",
-                   (name, tournament))
+    cursor.execute("INSERT INTO Registration (PlayerID, TournamentID) "
+                   "values (%s,%s);", (player, tournament))
     connection.commit()
     connection.close()
 
