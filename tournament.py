@@ -89,7 +89,7 @@ def countAllRegistrations():
     """Returns the number of registrations for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Regsitration;")
+    cursor.execute("SELECT count(*) FROM Registration;")
     numRegistrations = cursor.fetchone()[0]
     connection.close()
     return numRegistrations
@@ -103,8 +103,8 @@ def countRegistrations(tournament):
     """
     connection = connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM Regsitration WHERE TournamentID = %s;"
-                   , (tournament))
+    cursor.execute("SELECT count(*) FROM Registration WHERE TournamentID = %s;"
+                   , (tournament,))
     numTournamentRegistrations = cursor.fetchone()[0]
     connection.close()
     return numTournamentRegistrations
@@ -140,9 +140,20 @@ def countAllTournaments():
     connection = connect()
     cursor = connection.cursor()
     cursor.execute("SELECT count(*) FROM Tournament;")
-    numTournamens = cursor.fetchone()[0]
+    numTournaments = cursor.fetchone()[0]
     connection.close()
     return numTournaments
+
+
+def getTournamentInfo():
+    """Returns information about each tournament."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Tournament;")
+    tInfo = [(int(row[0]), str(row[1])) for row in cursor.fetchall()]
+    connection.commit()
+    connection.close()
+    return tInfo
 
 
 def createPlayerRecord(name):
@@ -170,6 +181,18 @@ def createTournament(gameType):
                    (gameType,))
     connection.commit()
     connection.close()
+
+
+def getPlayerBios():
+    """Returns biographical information from each player."""
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Player;")
+    bios = [(int(row[0]), str(row[1]), str(row[2]), str(row[3]))
+            for row in cursor.fetchall()]
+    connection.commit()
+    connection.close()
+    return bios
 
 
 def registerPlayer(player, tournament):
@@ -254,11 +277,11 @@ def tournamentStandings(tournament):
     return standings
 
 
-def reportMatch(tournament, winner, winnerPoints, loser, loserPoints, isTie):
+def reportMatch(tourny, winner, winnerPoints, loser, loserPoints, isTie):
     """Records the outcome of a single match between two players.
 
     Args:
-      tournament: the id number of the tournament the match is played in
+      tourny: the id number of the tournament the match is played in
       winner:  the id number of winning player registration
       winnerPoints:  the number of points the winner scored in the match
       loser:  the id number of the losing player registration
@@ -268,8 +291,8 @@ def reportMatch(tournament, winner, winnerPoints, loser, loserPoints, isTie):
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Match "
                    "(TournamentID, Winner, WinnerPoints, Loser, "
-                   "LoserPoints, IsATie) values (%s,%s,%s,%s,%s);",
-                   (winner, winnerPoints, loser, loserPoints, isTie))
+                   "LoserPoints, IsATie) values (%s,%s,%s,%s,%s,%s);",
+                   (tourny, winner, winnerPoints, loser, loserPoints, isTie))
     connection.commit()
     connection.close()
 

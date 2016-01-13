@@ -133,7 +133,7 @@ CREATE OR REPLACE VIEW Standings as
 		(SELECT count(*)
 			FROM Match
 			WHERE Winner = Registration.RegistrationID OR Loser = Registration.RegistrationID)
-			as MatchPlayed,
+			as MatchesPlayed,
 		coalesce(PlayerOpponentWins.OpponentWins, 0) as StrengthOfSchedule,
 		coalesce((SELECT sum(PointsScored)
 			FROM PlayerPoints
