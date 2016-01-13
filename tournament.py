@@ -85,7 +85,7 @@ def countPlayers():
     return numPlayers
 
 
-def countRegisteredPlayers():
+def countRegistrations():
     """Returns the number of registrations for all tournaments."""
     connection = connect()
     cursor = connection.cursor()
@@ -95,7 +95,7 @@ def countRegisteredPlayers():
     return numRegistrations
 
 
-def countRegisteredPlayers(tournament):
+def countRegistrations(tournament):
     """Returns the number of registrations for a specific tournament.
 
     Args:
@@ -120,7 +120,7 @@ def countMatches():
     return numMatches
 
 
-def countTournamentMatches(tournament):
+def countMatches(tournament):
     """Returns the number of matches for a specific tournament.
 
     Args:
@@ -157,6 +157,20 @@ def createPlayerRecord(name):
     connection.close()
 
 
+def createTournament(gameType):
+    """Creates a tournament of a specific type of game.
+  
+    Args:
+      gameType: the name of the game played in the tournament.
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO Tournament (GameType) values (%s);",
+                   (gameType,))
+    connection.commit()
+    connection.close()
+
+
 def registerPlayer(player, tournament):
     """Registers a player for a specific tournament.
   
@@ -176,18 +190,58 @@ def registerPlayer(player, tournament):
     connection.close()
 
 
+def playerStandings():
+    """Returns a list of the player rankings for ALL tournaments.
+
+    Players are sorted by wins, strength of schedule, points scored,
+    and time of registration.
+
+    The first entry in the list should be the player in first place in the
+    first tournament, or a player tied for first place 
+    if there is currently a tie.
+
+    Returns:
+      A list of tuples, each of which contains
+      (tournament id, registration id, name, wins, matches,
+      strength of schedule, and points):
+        tournament id: the unique id of a single tournament
+        registrationd id: a player's unique id for a tournament
+        name: the player's full name (as registered)
+        wins: the number of matches a player has won in the tournament
+        matches: the number of matches a player has played in the tournament
+        strength of schedule: the number of total wins a player's opponents
+            have in the tournament
+        points: the number of points a player has scored in the tournament
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Standings;")
+    standings = [(int(row[0]), (int(row[1]), str(row[2]),
+                 int(row[3]), int(row[4]),
+                 int(row[5]), int(row[6])) for row in cursor.fetchall()]
+    connection.close()
+    return standings
+
+
 def playerStandings(tournament):
-    """Returns a list of the players and their win records, sorted by wins.
+    """Returns a list of the players rankings for a single tournament.
+
+    Players are sorted by wins, strength of schedule, points scored,
+    and time of registration.
 
     The first entry in the list should be the player in first place, or a
     player tied for first place if there is currently a tie.
 
     Returns:
-      A list of tuples, each of which contains (id, name, wins, matches):
-        id: the player's unique id (assigned by the database)
+      A list of tuples, each of which contains
+      (registration id, name, wins, matches, strength of schedule, and points):
+        registrationd id: a player's unique id for the tournament
         name: the player's full name (as registered)
-        wins: the number of matches the player has won
-        matches: the number of matches the player has played
+        wins: the number of matches a player has won in the tournament
+        matches: the number of matches a player has played in the tournament
+        strength of schedule: the number of total wins a player's opponents
+            have in the tournament
+        points: the number of points a player has scored in the tournament
     """
     connection = connect()
     cursor = connection.cursor()
