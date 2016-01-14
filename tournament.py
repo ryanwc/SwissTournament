@@ -176,12 +176,10 @@ def createPlayerRecords(names):
     """
     connection = connect()
     cursor = connection.cursor()
-    i = 0
-    while i < len(names):
+    for name in names:
         cursor.execute("INSERT INTO Player (PlayerName) values (%s);",
-                       (names[i],))
+                       (name,))
         connection.commit()
-        i+=1
     connection.close()
 
 
@@ -208,12 +206,10 @@ def createTournaments(gameTypes):
     """
     connection = connect()
     cursor = connection.cursor()
-    i = 0
-    while i < len(gameTypes):
+    for game in gameTypes:
         cursor.execute("INSERT INTO Tournament (GameType) values (%s);",
-                       (gameTypes[i],))
+                       (game,))
         connection.commit()
-        i+=1
     connection.close()
 
 
@@ -245,6 +241,23 @@ def registerPlayer(player, tournament):
     cursor.execute("INSERT INTO Registration (PlayerID, TournamentID) "
                    "values (%s,%s);", (player, tournament))
     connection.commit()
+    connection.close()
+
+
+def registerAll(players, tournaments):
+    """Registers given players for given tournaments.
+
+    Args:
+        players: a list of player ids to register
+        tournaments: a list of tournaments to registers the players for
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    for tournament in tournaments:
+        for player in players:
+            cursor.execute("INSERT INTO Registration (PlayerID, TournamentID) "
+                   "values (%s,%s);", (player, tournament))
+            connection.commit()
     connection.close()
 
 

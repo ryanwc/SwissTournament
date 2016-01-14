@@ -50,18 +50,18 @@ def testCreateTournament():
 
 
 def testRegister():
-    """Test if player players can be registered to different tournaments"""
+    """Test if players can be registered to different tournaments"""
     deleteEverything()
     createPlayerRecords(["Chandra Nalaar", "Ned Flanders"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerPlayer(playerIDs[0], tIDs[0])
+    registerPlayer(playerIDs[1], tIDs[0])
+    registerPlayer(playerIDs[0], tIDs[1])
     cTotal = countAllRegistrations()
-    cFence = countRegistrations(tID[0])
-    cPing = countRegistrations(tID[1])
+    cFence = countRegistrations(tIDs[0])
+    cPing = countRegistrations(tIDs[1])
     if cTotal != 3 or cFence != 2 or cPing != 1:
         raise ValueError(
             "Incorrect registrations after multiple players " \
@@ -77,19 +77,12 @@ def testRegisterCountDeleteCount():
                         "Mao Tsu-hsi", "Atlanta Hope"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[3], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    registerPlayer(playerIDs[3], tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
     cPlayers = countAllPlayers()
     cRegistrations = countAllRegistrations()
-    cFencing = countRegistrations(tID[0])
-    cPing = countRegistrations(tID[1])
+    cFencing = countRegistrations(tIDs[0])
+    cPing = countRegistrations(tIDs[1])
     cTourn = countAllTournaments()
     if (cPlayers != 4 or cRegistrations != 8 or 
         cFencing != 4 or cPing != 4 or cTourn != 2):
@@ -111,11 +104,8 @@ def testStandingsBeforeMatches():
     createPlayerRecords(["Melpomene Murray", "Randy Schwartz"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
     standings = allStandings()
     if len(standings) < 4:
         raise ValueError("Players should appear in standings for a " \
@@ -136,7 +126,7 @@ def testStandingsBeforeMatches():
         raise ValueError(
             "Newly registered players should have no matches, " \
             "wins, strength of schedule, or points.")
-    if tourn1 != tID[0] or tourn2 != tID[1]:
+    if tourn1 != tIDs[0] or tourn2 != tIDs[1]:
         raise ValueError("Standings do not list correct tournament.")
     if ( set([name1, name2]) != set(["Melpomene Murray", "Randy Schwartz"]) or 
          set([name3, name4]) != set(["Melpomene Murray", "Randy Schwartz"]) ):
@@ -152,35 +142,28 @@ def testReportMatches():
                         "Cathy Burton", "Diane Grant"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[3], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    registerPlayer(playerIDs[3], tID[1])
-    standingsOne = tournamentStandings(tID[0])
-    standingsTwo = tournamentStandings(tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
+    standingsOne = tournamentStandings(tIDs[0])
+    standingsTwo = tournamentStandings(tIDs[1])
     [id1, id2, id3, id4] = [row[0] for row in standingsOne]
     [id5, id6, id7, id8] = [row[0] for row in standingsTwo]
-    reportMatch(tID[0], id1, 3, id2, 2, False)
-    reportMatch(tID[0], id3, 5, id4, 1, False)
-    reportMatch(tID[1], id5, 2, id6, 1, False)
-    reportMatch(tID[1], id7, 4, id8, 0, False)
+    reportMatch(tIDs[0], id1, 3, id2, 2, False)
+    reportMatch(tIDs[0], id3, 5, id4, 1, False)
+    reportMatch(tIDs[1], id5, 2, id6, 1, False)
+    reportMatch(tIDs[1], id7, 4, id8, 0, False)
     standings = allStandings()
     i = 0
     while i < 4:
-        if standings[i][0] != tID[0]:
-            raise ValueError("TournmentID is not correct in standings.")
+        if standings[i][0] != tIDs[0]:
+            raise ValueError("TournmentIDs is not correct in standings.")
         i+=1
     while i < 8:
-        if standings[i][0] != tID[1]:
-            raise ValueError("TournmentID is not correct in standings.")
+        if standings[i][0] != tIDs[1]:
+            raise ValueError("TournmentIDs is not correct in standings.")
         i+=1
-    standingsOne = tournamentStandings(tID[0])
-    standingsTwo = tournamentStandings(tID[1])
+    standingsOne = tournamentStandings(tIDs[0])
+    standingsTwo = tournamentStandings(tIDs[1])
     for (i, n, w, m, s, p) in standingsOne:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
@@ -226,25 +209,18 @@ def testPairings():
                          "Applejack", "Pinkie Pie"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[3], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    registerPlayer(playerIDs[3], tID[1])
-    standingsOne = tournamentStandings(tID[0])
-    standingsTwo = tournamentStandings(tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
+    standingsOne = tournamentStandings(tIDs[0])
+    standingsTwo = tournamentStandings(tIDs[1])
     [Rid1, Rid2, Rid3, Rid4] = [row[0] for row in standingsOne]
     [Rid5, Rid6, Rid7, Rid8] = [row[0] for row in standingsTwo]
-    reportMatch(tID[0], Rid1, 2, Rid2, 0, False)
-    reportMatch(tID[0], Rid3, 3, Rid4, 2, False)
-    reportMatch(tID[1], Rid6, 1, Rid5, 0, False)
-    reportMatch(tID[1], Rid8, 2, Rid7, 1, False)
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    reportMatch(tIDs[0], Rid1, 2, Rid2, 0, False)
+    reportMatch(tIDs[0], Rid3, 3, Rid4, 2, False)
+    reportMatch(tIDs[1], Rid6, 1, Rid5, 0, False)
+    reportMatch(tIDs[1], Rid8, 2, Rid7, 1, False)
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     if len(pairingsOne) != 2 or len(pairingsTwo) != 2:
         raise ValueError(
             "For four players, swissPairings should return two pairs.")
@@ -266,15 +242,10 @@ def testOddNumberPlayers():
     createPlayerRecords(["Twilight Sparkle", "Fluttershy", "Applejack"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
     [(Pid5, Pid6), (Pid7, Pid8)] = [(row[0],row[2]) for row in pairingsTwo]
     if ( pairingsOne[0][2] != None or
@@ -287,12 +258,12 @@ def testOddNumberPlayers():
             "that tournament")
     print "10. With an odd number of players, the first registered player " \
           "in a tournament gets a bye in the first round."
-    reportMatch(tID[0], Pid1, 0, Pid2, 0, False)
-    reportMatch(tID[0], Pid3, 1, Pid4, 0, False)
-    reportMatch(tID[1], Pid5, 0, Pid6, 0, False)
-    reportMatch(tID[1], Pid7, 1, Pid8, 0, False)
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    reportMatch(tIDs[0], Pid1, 0, Pid2, 0, False)
+    reportMatch(tIDs[0], Pid3, 1, Pid4, 0, False)
+    reportMatch(tIDs[1], Pid5, 0, Pid6, 0, False)
+    reportMatch(tIDs[1], Pid7, 1, Pid8, 0, False)
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
     [(Pid5, Pid6), (Pid7, Pid8)] = [(row[0],row[2]) for row in pairingsTwo]
     if ( pairingsOne[0][2] != None or
@@ -303,12 +274,12 @@ def testOddNumberPlayers():
             "An incorrect player got a bye in the second round")
     print "11. The correct player got a bye in the second round " \
           "of each tournament."
-    reportMatch(tID[0], Pid1, 0, Pid2, 0, False)
-    reportMatch(tID[0], Pid3, 3, Pid4, 0, False)
-    reportMatch(tID[1], Pid5, 0, Pid6, 0, False)
-    reportMatch(tID[1], Pid7, 3, Pid8, 0, False)
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    reportMatch(tIDs[0], Pid1, 0, Pid2, 0, False)
+    reportMatch(tIDs[0], Pid3, 3, Pid4, 0, False)
+    reportMatch(tIDs[1], Pid5, 0, Pid6, 0, False)
+    reportMatch(tIDs[1], Pid7, 3, Pid8, 0, False)
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
     [(Pid5, Pid6), (Pid7, Pid8)] = [(row[0],row[2]) for row in pairingsTwo]
     if ( pairingsOne[0][2] != None or
@@ -327,23 +298,16 @@ def testTies():
                          "Cathy Burton", "Diane Grant"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[3], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    registerPlayer(playerIDs[3], tID[1])
-    standingsOne = tournamentStandings(tID[0])
-    standingsTwo = tournamentStandings(tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
+    standingsOne = tournamentStandings(tIDs[0])
+    standingsTwo = tournamentStandings(tIDs[1])
     [id1, id2, id3, id4] = [row[0] for row in standingsOne]
     [id5, id6, id7, id8] = [row[0] for row in standingsTwo]
-    reportMatch(tID[0], id1, 3, id2, 2, False)
-    reportMatch(tID[0], id3, 4, id4, 4, True)
-    reportMatch(tID[1], id5, 2, id6, 1, False)
-    reportMatch(tID[1], id7, 3, id8, 3, True)
+    reportMatch(tIDs[0], id1, 3, id2, 2, False)
+    reportMatch(tIDs[0], id3, 4, id4, 4, True)
+    reportMatch(tIDs[1], id5, 2, id6, 1, False)
+    reportMatch(tIDs[1], id7, 3, id8, 3, True)
     standings = allStandings()
     for (t, i, n, w, m, s, p) in standings:
         if m != 1:
@@ -376,23 +340,16 @@ def testTieBreaks():
                          "Applejack", "Thor"])
     createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
-    tID = [int(row[0]) for row in getTournamentInfo()]
-    registerPlayer(playerIDs[0], tID[0])
-    registerPlayer(playerIDs[1], tID[0])
-    registerPlayer(playerIDs[2], tID[0])
-    registerPlayer(playerIDs[3], tID[0])
-    registerPlayer(playerIDs[0], tID[1])
-    registerPlayer(playerIDs[1], tID[1])
-    registerPlayer(playerIDs[2], tID[1])
-    registerPlayer(playerIDs[3], tID[1])
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    tIDs = [int(row[0]) for row in getTournamentInfo()]
+    registerAll(playerIDs, tIDs)
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(tID[0], id1, 4, id2, 2, False)
-    reportMatch(tID[0], id3, 5, id4, 1, False)
-    reportMatch(tID[1], id5, 5, id6, 3, False)
-    reportMatch(tID[1], id7, 6, id8, 2, False)
+    reportMatch(tIDs[0], id1, 4, id2, 2, False)
+    reportMatch(tIDs[0], id3, 5, id4, 1, False)
+    reportMatch(tIDs[1], id5, 5, id6, 3, False)
+    reportMatch(tIDs[1], id7, 6, id8, 2, False)
     # After one round of tournament 1:
     # 1. Applejack  1 wins, 0 SOS,  5 pts, ID 3
     # 2. Twilight   1 wins, 0 SOS,  4 pts, ID 1
@@ -414,14 +371,14 @@ def testTieBreaks():
          position[6] != 'Fluttershy' or
          position[7] != 'Thor' ):
         raise ValueError("Points did not break tie correctly")
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(tID[0], id1, 3, id2, 3, True)
-    reportMatch(tID[0], id3, 2, id4, 1, False)
-    reportMatch(tID[1], id5, 4, id6, 4, True)
-    reportMatch(tID[1], id7, 3, id8, 2, False)
+    reportMatch(tIDs[0], id1, 3, id2, 3, True)
+    reportMatch(tIDs[0], id3, 2, id4, 1, False)
+    reportMatch(tIDs[1], id5, 4, id6, 4, True)
+    reportMatch(tIDs[1], id7, 3, id8, 2, False)
     # After two rounds of tournament 1:
     # 1. Twilight   1 wins,  2 SOS,  7 pts, ID 1
     # 2. Applejack  1 wins,  1 SOS,  8 pts, ID 3
@@ -443,14 +400,14 @@ def testTieBreaks():
          position[6] != 'Fluttershy' or
          position[7] != 'Thor' ):
         raise ValueError("Strength of schedule did not break tie correctly")
-    pairingsOne = swissPairings(tID[0])
-    pairingsTwo = swissPairings(tID[1])
+    pairingsOne = swissPairings(tIDs[0])
+    pairingsTwo = swissPairings(tIDs[1])
     [(id1, id2), (id3, id4)] = [(row[0],row[2]) for row in pairingsOne]
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
-    reportMatch(tID[0], id2, 7, id1, 0, False)
-    reportMatch(tID[0], id4, 2, id3, 1, False)
-    reportMatch(tID[1], id6, 8, id5, 1, False)
-    reportMatch(tID[1], id8, 3, id7, 2, False)
+    reportMatch(tIDs[0], id2, 7, id1, 0, False)
+    reportMatch(tIDs[0], id4, 2, id3, 1, False)
+    reportMatch(tIDs[1], id6, 8, id5, 1, False)
+    reportMatch(tIDs[1], id8, 3, id7, 2, False)
     # After three rounds of tournament 1:
     # 1. Fluttershy 2 win,  3 SOS,  6 pts, ID 2
     # 2. Applejack  1 win,  4 SOS,  9 pts, ID 3
