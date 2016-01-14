@@ -11,7 +11,7 @@ def testDelete():
     deleteAllRegistrations()
     deleteAllTournaments()
     deleteAllPlayers()
-    print "1. All matches, registrations, tournaments and " \
+    print "1. All matches, registrations, tournaments, and " \
         "players can be deleted."
 
 
@@ -340,7 +340,7 @@ def testOddNumberPlayers():
     reportMatch(tID[1], Pid5, 0, Pid6, 0, False)
     reportMatch(tID[1], Pid7, 1, Pid8, 0, False)
     pairingsOne = swissPairings(tID[0])
-    pairingsOne = swissPairings(tID[1])
+    pairingsTwo = swissPairings(tID[1])
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
     [(Pid5, Pid6), (Pid7, Pid8)] = [(row[0],row[2]) for row in pairingsTwo]
     if ( pairingsOne[0][2] != None or
@@ -351,12 +351,12 @@ def testOddNumberPlayers():
             "An incorrect player got a bye in the second round")
     print "11. The correct player got a bye in the second round " \
           "of each tournament."
-    reportMatch(tID[0], Pid1, 0, id2, 0, False)
-    reportMatch(tID[0], Pid3, 3, id4, 0, False)
-    reportMatch(tID[1], Pid5, 0, id6, 0, False)
-    reportMatch(tID[1], Pid7, 3, id8, 0, False)
+    reportMatch(tID[0], Pid1, 0, Pid2, 0, False)
+    reportMatch(tID[0], Pid3, 3, Pid4, 0, False)
+    reportMatch(tID[1], Pid5, 0, Pid6, 0, False)
+    reportMatch(tID[1], Pid7, 3, Pid8, 0, False)
     pairingsOne = swissPairings(tID[0])
-    pairingsOne = swissPairings(tID[1])
+    pairingsTwo = swissPairings(tID[1])
     [(Pid1, Pid2), (Pid3, Pid4)] = [(row[0],row[2]) for row in pairingsOne]
     [(Pid5, Pid6), (Pid7, Pid8)] = [(row[0],row[2]) for row in pairingsTwo]
     if ( pairingsOne[0][2] != None or
@@ -419,7 +419,8 @@ def testTies():
             raise ValueError("Non-losers' strength of schedule should be 0")
         if i in (id2, id6) and s != 1:
             raise ValueError("Loser's strength of schedule should be 1")   
-    print "13. After a round with ties, players have correct standings."
+    print "13. After a round with ties in multiple tournaments, " \
+          "all tournament standings are correct."
 
 
 def testTieBreaks():
@@ -450,8 +451,8 @@ def testTieBreaks():
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
     reportMatch(tID[0], id1, 4, id2, 2, False)
     reportMatch(tID[0], id3, 5, id4, 1, False)
-    reportMatch(tID[1], id5, 5, id2, 3, False)
-    reportMatch(tID[1], id7, 6, id4, 2, False)
+    reportMatch(tID[1], id5, 5, id6, 3, False)
+    reportMatch(tID[1], id7, 6, id8, 2, False)
     # After one round of tournament 1:
     # 1. Applejack  1 wins, 0 SOS,  5 pts, ID 3
     # 2. Twilight   1 wins, 0 SOS,  4 pts, ID 1
@@ -463,7 +464,7 @@ def testTieBreaks():
     # 3. Fluttershy 0 wins, 1 SOS,  3 pts, ID 6
     # 4. Thor       0 wins, 1 SOS,  2 pts, ID 8
     standings = allStandings()
-    position = [row[1] for row in standings]
+    position = [row[2] for row in standings]
     if ( position[0] != 'Applejack' or
          position[1] != 'Twilight Sparkle' or
          position[2] != 'Fluttershy' or
@@ -479,8 +480,8 @@ def testTieBreaks():
     [(id5, id6), (id7, id8)] = [(row[0],row[2]) for row in pairingsTwo]
     reportMatch(tID[0], id1, 3, id2, 3, True)
     reportMatch(tID[0], id3, 2, id4, 1, False)
-    reportMatch(tID[1], id1, 4, id2, 4, True)
-    reportMatch(tID[1], id3, 3, id4, 2, False)
+    reportMatch(tID[1], id5, 4, id6, 4, True)
+    reportMatch(tID[1], id7, 3, id8, 2, False)
     # After two rounds of tournament 1:
     # 1. Twilight   1 wins,  2 SOS,  7 pts, ID 1
     # 2. Applejack  1 wins,  1 SOS,  8 pts, ID 3
@@ -492,7 +493,7 @@ def testTieBreaks():
     # 3. Fluttershy 1 wins,  1 SOS,  6 pts,  ID 6
     # 4. Thor       0 wins,  2 SOS,  4 pts,  ID 8
     standings = allStandings()
-    position = [row[1] for row in standings]
+    position = [row[2] for row in standings]
     if ( position[0] != 'Twilight Sparkle' or
          position[1] != 'Applejack' or
          position[2] != 'Fluttershy' or
@@ -521,7 +522,7 @@ def testTieBreaks():
     # 3. Thor       1 win,  4 SOS,  12 pts, ID 8
     # 4. Twilight   1 win,  4 SOS,  10 pts, ID 5
     standings = allStandings()
-    position = [row[1] for row in standings]
+    position = [row[2] for row in standings]
     if ( position[0] != 'Fluttershy' or
          position[1] != 'Applejack' or
          position[2] != 'Thor' or
@@ -531,9 +532,9 @@ def testTieBreaks():
          position[6] != 'Thor' or
          position[7] != 'Twilight Sparkle' ):
         raise ValueError("PlayerID did not break tie correctly")
-    print "14. After three rounds including at least one tie, and " \
-          "a three-way tie for second based on wins, "  \
-          "all tie-breakers work properly."
+    print "14. After three rounds of multiple tournaments, including at " \
+          "least one tie in each tournament and a three-way tie for second " \
+          "place in each tournament, all tie-breakers work properly."
 
 
 if __name__ == '__main__':
