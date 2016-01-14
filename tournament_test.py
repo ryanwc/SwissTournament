@@ -7,20 +7,14 @@ from tournament import *
 
 def testDelete():
     """Test if deletion from tables works"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
+    deleteEverything()
     print "1. All matches, registrations, tournaments, and " \
         "players can be deleted."
 
 
 def testCount():
     """Test if count returns numeric type 0 for empty tables"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
+    deleteEverything()
     cM = countAllMatches()
     cR = countAllRegistrations()
     cT = countAllTournaments()
@@ -35,10 +29,7 @@ def testCount():
 
 def testCreatePlayer():
     """Test if player records can be created"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
+    deleteEverything()
     createPlayerRecord("Chandra Nalaar")
     c = countAllPlayers()
     if c != 1:
@@ -49,10 +40,7 @@ def testCreatePlayer():
 
 def testCreateTournament():
     """Test if tournaments can be created"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
+    deleteEverything()
     createTournament("Fencing")
     c = countAllTournaments()
     if c != 1:
@@ -63,14 +51,9 @@ def testCreateTournament():
 
 def testRegister():
     """Test if player players can be registered to different tournaments"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Chandra Nalaar")
-    createPlayerRecord("Ned Flanders")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Chandra Nalaar", "Ned Flanders"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -89,16 +72,10 @@ def testRegister():
 
 def testRegisterCountDeleteCount():
     """Test table counts after registration and then deletion"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Markov Chaney")
-    createPlayerRecord("Joe Malik")
-    createPlayerRecord("Mao Tsu-hsi")
-    createPlayerRecord("Atlanta Hope")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Markov Chaney", "Joe Malik",
+                        "Mao Tsu-hsi", "Atlanta Hope"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -119,9 +96,7 @@ def testRegisterCountDeleteCount():
         raise ValueError(
             "After registering four players for two tournaments, " \
             "counts are wrong.")
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
+    deleteEverything()
     cPlayers = countAllPlayers()
     cRegistrations = countAllRegistrations()
     cTourn = countAllTournaments()
@@ -132,14 +107,9 @@ def testRegisterCountDeleteCount():
 
 def testStandingsBeforeMatches():
     """Test whether standings show players with no matches"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Melpomene Murray")
-    createPlayerRecord("Randy Schwartz")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Melpomene Murray", "Randy Schwartz"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -177,16 +147,10 @@ def testStandingsBeforeMatches():
 
 def testReportMatches():
     """Test if recording matches causes correct changes to standings"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Bruno Walton")
-    createPlayerRecord("Boots O'Neal")
-    createPlayerRecord("Cathy Burton")
-    createPlayerRecord("Diane Grant")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Bruno Walton", "Boots O'Neal",
+                        "Cathy Burton", "Diane Grant"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -257,16 +221,10 @@ def testReportMatches():
 
 def testPairings():
     """Test if pairing algorithm works for multiple tournaments"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Twilight Sparkle")
-    createPlayerRecord("Fluttershy")
-    createPlayerRecord("Applejack")
-    createPlayerRecord("Pinkie Pie")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Twilight Sparkle", "Fluttershy",
+                         "Applejack", "Pinkie Pie"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -304,15 +262,9 @@ def testPairings():
 
 def testOddNumberPlayers():
     """Test if pairing algorithm handles multiple odd # player tournaments"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Twilight Sparkle")
-    createPlayerRecord("Fluttershy")
-    createPlayerRecord("Applejack")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Twilight Sparkle", "Fluttershy", "Applejack"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -370,16 +322,10 @@ def testOddNumberPlayers():
 
 def testTies():
     """Test if pairings and standings for multiple tournies work with ties"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Bruno Walton")
-    createPlayerRecord("Boots O'Neal")
-    createPlayerRecord("Cathy Burton")
-    createPlayerRecord("Diane Grant")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Bruno Walton", "Boots O'Neal",
+                         "Cathy Burton", "Diane Grant"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -425,16 +371,10 @@ def testTies():
 
 def testTieBreaks():
     """Test if tie breakers work properly"""
-    deleteAllMatches()
-    deleteAllRegistrations()
-    deleteAllTournaments()
-    deleteAllPlayers()
-    createPlayerRecord("Twilight Sparkle")
-    createPlayerRecord("Fluttershy")
-    createPlayerRecord("Applejack")
-    createPlayerRecord("Thor")
-    createTournament("Fencing")
-    createTournament("Ping Pong")
+    deleteEverything()
+    createPlayerRecords(["Twilight Sparkle", "Fluttershy",
+                         "Applejack", "Thor"])
+    createTournaments(["Fencing", "Ping Pong"])
     playerIDs = [int(row[0]) for row in getPlayerBios()]
     tID = [int(row[0]) for row in getTournamentInfo()]
     registerPlayer(playerIDs[0], tID[0])
@@ -537,6 +477,14 @@ def testTieBreaks():
           "place in each tournament, all tie-breakers work properly."
 
 
+def deleteEverything():
+    """Helper method for deleting all records from the database"""
+    deleteAllMatches()
+    deleteAllRegistrations()
+    deleteAllTournaments()
+    deleteAllPlayers()
+
+
 if __name__ == '__main__':
     testDelete()
     testCount()
@@ -551,5 +499,4 @@ if __name__ == '__main__':
     testTies()
     testTieBreaks()
     print "Success!  All tests pass!"
-
 

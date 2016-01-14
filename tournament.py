@@ -168,6 +168,22 @@ def createPlayerRecord(name):
     connection.commit()
     connection.close()
 
+def createPlayerRecords(names):
+    """Creates player records from a list of names.
+  
+    Args:
+      names: a list of players' full names (need not be unique).
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    i = 0
+    while i < len(names):
+        cursor.execute("INSERT INTO Player (PlayerName) values (%s);",
+                       (names[i],))
+        connection.commit()
+        i+=1
+    connection.close()
+
 
 def createTournament(gameType):
     """Creates a tournament of a specific type of game.
@@ -180,6 +196,24 @@ def createTournament(gameType):
     cursor.execute("INSERT INTO Tournament (GameType) values (%s);",
                    (gameType,))
     connection.commit()
+    connection.close()
+
+
+def createTournaments(gameTypes):
+    """Creates more than one tournament with (possibly) different game types.
+  
+    Args:
+      gameTypes: a list of games corresponding to the games played in each
+      tournament.
+    """
+    connection = connect()
+    cursor = connection.cursor()
+    i = 0
+    while i < len(gameTypes):
+        cursor.execute("INSERT INTO Tournament (GameType) values (%s);",
+                       (gameTypes[i],))
+        connection.commit()
+        i+=1
     connection.close()
 
 
