@@ -12,10 +12,10 @@ This database supports multiple Swiss-style tournaments with even or odd numbers
 
 In each tournament, players are ranked as follows:
 
-1) A player with more wins is ranked higher than a player with less wins.
-2) If players have equal wins, a player who has a higher strength of schedule (calculated as a player's oppoents' total wins) is ranked higher.
-3) If players have equal wins and strength of schedule, a player with more total points scored in all of his or her matches is ranked higher.
-4) If players have equal wins, strength of schedule, and points scored, a player who registered earlier (as judged by a lower RegistrationID) is ranked higher.
+1. A player with more wins is ranked higher than a player with less wins.
+2. If players have equal wins, a player who has a higher strength of schedule (calculated as a player's oppoents' total wins) is ranked higher.
+3. If players have equal wins and strength of schedule, a player with more total points scored in all of his or her matches is ranked higher.
+4. If players have equal wins, strength of schedule, and points scored, a player who registered earlier (as judged by a lower RegistrationID) is ranked higher.
 
 **Ties**
 
