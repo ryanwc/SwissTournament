@@ -333,11 +333,6 @@ def reportMatch(tourny, winner, winnerPoints, loser, loserPoints, isTie):
     however, this particular logic would require a user-defined function in
     a SQL CHECK expression, so it's cleaner to include the logic here instead.
 
-CREATE FUNCTION correctTournament(integer) RETURNS VOID AS $$
-    SELECT TournamentID FROM Registration
-        WHERE RegistrationID = $1;
-$$ LANGUAGE SQL;
-
     Args:
       tourny: the id number of the tournament the match is played in
       winner:  the id number of winning player registration
