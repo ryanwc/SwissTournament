@@ -327,6 +327,17 @@ def tournamentStandings(tournament):
 def reportMatch(tourny, winner, winnerPoints, loser, loserPoints, isTie):
     """Records the outcome of a single match between two players.
 
+    Includes business logic that rejects match reports between registrations
+    that do not relate to the given tournament.
+    All other "database consistency" logic is in the schema definition;
+    however, this particular logic would require a user-defined function in
+    a SQL CHECK expression, so it's cleaner to include the logic here instead.
+
+CREATE FUNCTION correctTournament(integer) RETURNS VOID AS $$
+    SELECT TournamentID FROM Registration
+        WHERE RegistrationID = $1;
+$$ LANGUAGE SQL;
+
     Args:
       tourny: the id number of the tournament the match is played in
       winner:  the id number of winning player registration
@@ -335,6 +346,20 @@ def reportMatch(tourny, winner, winnerPoints, loser, loserPoints, isTie):
       loserPoints:  the number of points the loser scored in the match
     """
     connection = connect()
+    cursor = connection.cursor()
+    cursor.execute("SELECT TournamentID FROM Registration "
+                   "WHERE RegistrationID = %s ", (winner,))
+    winnerTourny = cursor.fetchone()[0]
+    if winnerTourny != tourny:
+        raise ValueError("Winner is not registered for this tournament.")
+    cursor = connection.cursor()
+    cursor.execute("SELECT TournamentID FROM Registration "
+                   "WHERE RegistrationID = %s ", (loser,))
+    loserTourny = cursor.fetchone()
+    # to account for byes
+    if loserTourny != None:
+        if loserTourny[0] != tourny:
+            raise ValueError("Loser is not registered for this tournament.")
     cursor = connection.cursor()
     cursor.execute("INSERT INTO Match "
                    "(TournamentID, Winner, WinnerPoints, Loser, "

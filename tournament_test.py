@@ -136,7 +136,7 @@ def testStandingsBeforeMatches():
 
 
 def testReportMatches():
-    """Test if recording matches causes correct changes to standings"""
+    """Test if recording matches causes correct changes to standings."""
     deleteEverything()
     createPlayerRecords(["Bruno Walton", "Boots O'Neal",
                         "Cathy Burton", "Diane Grant"])

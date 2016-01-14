@@ -39,8 +39,10 @@ CREATE TABLE Registration (
 );
 
 -- table holds match info
--- NEED GUARDS AGAINST MATCHES NOT IN CORRECT TOURNAMENT
--- WITH USER-DEFINED FUNCTION IN CHECK CONSTRAINT
+-- NOTE: CHECKs against match reports between registrations that do not
+-- relate to the given tournament are contained in related Python code
+-- these checks would require a user-defined function,
+-- so it is cleaner to put the check elsewhere)
 CREATE TABLE Match (
 	MatchID serial PRIMARY KEY,
 	TournamentID integer NOT NULL REFERENCES Tournament (TournamentID),
