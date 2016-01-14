@@ -441,10 +441,16 @@ def swissPairings(tournament):
     # pre-set each player's "already paired" status to False
     orderedPlayers = [[int(row[0]), str(row[1]), False]
                       for row in cursor.fetchall()]
+    cursor = connection.cursor()
+    # NOTE: Could build on following idea to use a different pairing
+    # algorithm for the first round (e.g., random):
+    #cursor.execute("SELECT * FROM Match WHERE TournamentID = %s;",
+    #               (tournament,))
+    #firstRound = cursor.fetchone()==None
     connection.close()
 
     playerPairings = []
-    # assign the bye, if needed, to highest ranked player
+    # assign the bye, if needed, to highest ranked player without a bye
     if len(orderedPlayers) % 2 == 1:
         for j in range(0, len(orderedPlayers)):
             if not testBye(orderedPlayers[j][0]):

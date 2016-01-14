@@ -35,6 +35,8 @@ Pairings for each round of each tournament are calculated by a Python implementa
 	- neither player is already paired for this round; and 
 	- the players have not yet played in this tournament (i.e., no re-matches).
 
+The above algorithm is used to decide pairings for *every* round of the tournament, including the first.  Note that rankings before any matches have taken place are determined by registration order -- players that register ealier are ranked higher.  If this is not satisfactory, the algorithm could easily be changed to support random ordering in the first round, or the database schema could be changed to support a different pre-first-round ranking (for example, by ordering the standings by a new "rating" or "total wins in previous tournaments" column).
+
 # Technical Requirements for this Code
 
 The database schema was written in PostgreSQL, and the wrapper language used to access the database is Python.  So, to use this code as-is, you should ensure you have the following installed on your machine:
